@@ -2603,14 +2603,36 @@
       openSwipeRowEl = null;
     }
   }
+  const LONG_PRESS_MS = 500;
   function enableChatRowSwipe(wrapEl, rowEl, onTapOpen){
     let startX = 0, startY = 0, currentX = 0, dragging = false, decided = false, isHorizontal = false;
+    let longPressTimer = null;
+    let longPressFired = false;
+    function clearLongPressTimer(){
+      if (longPressTimer){ clearTimeout(longPressTimer); longPressTimer = null; }
+    }
+    function openDeleteBySwipe(){
+      rowEl.style.transform = 'translateX(' + SWIPE_OPEN_X + 'px)';
+      if (openSwipeRowEl && openSwipeRowEl !== rowEl) openSwipeRowEl.style.transform = 'translateX(0)';
+      openSwipeRowEl = rowEl;
+    }
     rowEl.addEventListener('pointerdown', function(e){
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       startX = e.clientX; startY = e.clientY;
       currentX = openSwipeRowEl === rowEl ? SWIPE_OPEN_X : 0;
       dragging = true; decided = false; isHorizontal = false;
+      longPressFired = false;
       rowEl.classList.add('dragging');
+      // Tekan & tahan (tanpa menggeser) juga membuka akses hapus,
+      // sama seperti swipe ke kiri.
+      clearLongPressTimer();
+      longPressTimer = setTimeout(function(){
+        if (dragging && !decided){
+          longPressFired = true;
+          rowEl.classList.remove('dragging');
+          openDeleteBySwipe();
+        }
+      }, LONG_PRESS_MS);
     });
     rowEl.addEventListener('pointermove', function(e){
       if (!dragging) return;
@@ -2619,6 +2641,7 @@
       if (!decided){
         if (Math.abs(dx) > 6 || Math.abs(dy) > 6){
           decided = true;
+          clearLongPressTimer();
           isHorizontal = Math.abs(dx) > Math.abs(dy);
           if (isHorizontal) rowEl.setPointerCapture(e.pointerId);
         } else {
@@ -2635,9 +2658,11 @@
       rowEl.style.transform = 'translateX(' + x + 'px)';
     });
     function endDrag(e){
+      clearLongPressTimer();
       if (!dragging) return;
       dragging = false;
       rowEl.classList.remove('dragging');
+      if (longPressFired) return;
       if (!isHorizontal){
         if (!decided && onTapOpen){
           if (openSwipeRowEl === rowEl){ closeOpenSwipeRow(); return; }
@@ -2647,9 +2672,7 @@
         return;
       }
       if (currentX < SWIPE_OPEN_X / 2){
-        rowEl.style.transform = 'translateX(' + SWIPE_OPEN_X + 'px)';
-        if (openSwipeRowEl && openSwipeRowEl !== rowEl) openSwipeRowEl.style.transform = 'translateX(0)';
-        openSwipeRowEl = rowEl;
+        openDeleteBySwipe();
       } else {
         rowEl.style.transform = 'translateX(0)';
         if (openSwipeRowEl === rowEl) openSwipeRowEl = null;
