@@ -1231,7 +1231,6 @@
         <label>Email Akun Kamu</label>
         <input type="text" id="settingsMyEmail" readonly disabled>
       </div>
-      <div class="status-field-hint" style="margin:-10px 0 14px;">Ini email akun yang sedang login.</div>
 
       <div class="field">
         <label>Status</label>
@@ -1267,8 +1266,10 @@
 
       <div class="settings-divider" style="margin-top:18px;"></div>
 
-      <div class="panel-section-title" style="margin:16px 0 6px;">Permintaan Masuk</div>
-      <div id="incomingRequestsWrap"><div class="empty-hint">Tidak ada permintaan masuk.</div></div>
+      <div id="incomingRequestsSection" style="display:none;">
+        <div class="panel-section-title" style="margin:16px 0 6px;">Permintaan Masuk</div>
+        <div id="incomingRequestsWrap"></div>
+      </div>
 
       <div class="panel-section-title" style="margin:16px 0 6px;">Daftar Teman</div>
       <div id="friendsListWrap"><div class="empty-hint">Belum ada teman. Tambahkan lewat email di atas.</div></div>
@@ -2160,7 +2161,8 @@
     clearSavedActiveChat();
     document.getElementById('chatListWrap').innerHTML = '<div class="empty-hint">Belum ada percakapan. Mulai chat dari tab TEMAN.</div>';
     document.getElementById('friendsListWrap').innerHTML = '<div class="empty-hint">Belum ada teman. Tambahkan lewat email di atas.</div>';
-    document.getElementById('incomingRequestsWrap').innerHTML = '<div class="empty-hint">Tidak ada permintaan masuk.</div>';
+    document.getElementById('incomingRequestsWrap').innerHTML = '';
+    document.getElementById('incomingRequestsSection').style.display = 'none';
     document.getElementById('chatEmptyState').style.display = 'flex';
     document.getElementById('chatActiveWrap').style.display = 'none';
   }
@@ -2382,11 +2384,14 @@
   // ===================================================================
   function renderIncomingRequests(){
     let wrap = document.getElementById('incomingRequestsWrap');
+    let section = document.getElementById('incomingRequestsSection');
     let uids = Object.keys(incomingRequests);
     if (uids.length === 0){
-      wrap.innerHTML = '<div class="empty-hint">Tidak ada permintaan masuk.</div>';
+      wrap.innerHTML = '';
+      section.style.display = 'none';
       return;
     }
+    section.style.display = 'block';
     wrap.innerHTML = '';
     uids.forEach(function(fromUid){
       let req = incomingRequests[fromUid];
@@ -2691,8 +2696,8 @@
     let chat = chatsIndex[chatId];
     let isPrivate = chat && chat.type === 'private';
     let msg = isPrivate
-      ? 'Hapus semua pesan obrolan dengan "' + name + '"? Nama/teman ini akan tetap ada di daftar chat kamu, hanya riwayat pesannya saja yang dihapus.'
-      : 'Hapus semua pesan obrolan grup "' + name + '"? Grup dan anggotanya akan tetap ada seperti biasa, hanya riwayat pesannya saja yang dihapus untuk semua anggota.';
+      ? 'Apakah anda ingin hapus semua pesan obrolan dengan "' + name + '"? Nama/teman ini akan tetap ada di daftar chat kamu, hanya riwayat pesannya saja yang dihapus.'
+      : 'Apakah anda ingin hapus semua pesan obrolan grup "' + name + '"? Grup dan anggotanya akan tetap ada seperti biasa, hanya riwayat pesannya saja yang dihapus untuk semua anggota.';
     if (!confirm(msg)) return;
 
     // Baik chat privat maupun grup: yang dihapus HANYA riwayat
