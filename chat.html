@@ -2712,12 +2712,14 @@
     }
   });
 
-  function deleteChatFromList(chatId, name){
+  function deleteChatFromList(chatId, name, simpleConfirm){
     let chat = chatsIndex[chatId];
     let isPrivate = chat && chat.type === 'private';
-    let msg = isPrivate
-      ? 'Apakah anda ingin hapus semua pesan obrolan dengan "' + name + '"? Nama/teman ini akan tetap ada di daftar chat kamu, hanya riwayat pesannya saja yang dihapus.'
-      : 'Apakah anda ingin hapus semua pesan obrolan grup "' + name + '"? Grup dan anggotanya akan tetap ada seperti biasa, hanya riwayat pesannya saja yang dihapus untuk semua anggota.';
+    let msg = simpleConfirm
+      ? 'Hapus semua pesan obrolan dengan "' + name + '"?'
+      : (isPrivate
+        ? 'Apakah anda ingin hapus semua pesan obrolan dengan "' + name + '"? Nama/teman ini akan tetap ada di daftar chat kamu, hanya riwayat pesannya saja yang dihapus.'
+        : 'Apakah anda ingin hapus semua pesan obrolan grup "' + name + '"? Grup dan anggotanya akan tetap ada seperti biasa, hanya riwayat pesannya saja yang dihapus untuk semua anggota.');
     if (!confirm(msg)) return;
 
     // Baik chat privat maupun grup: yang dihapus HANYA riwayat
@@ -2738,7 +2740,7 @@
 
   function removeFriendAndChat(chatId, otherUid, name){
     if (!otherUid) return;
-    let msg = 'Hapus pertemanan dengan "' + name + '"? Orang ini akan hilang dari daftar chat kamu. Kalau suatu saat ingin ngobrol lagi, cari namanya lewat kolom pencarian untuk mulai percakapan baru yang masih kosong.';
+    let msg = 'Hapus pertemanan akan menghapus percakapan kamu sebelumnya, apakah anda yakin?';
     if (!confirm(msg)) return;
 
     // Hapus pertemanan dua arah, hapus chat dari daftar kedua pihak,
@@ -2901,7 +2903,7 @@
     if (!activeChatId) return;
     let chat = chatsIndex[activeChatId];
     let name = chat ? chatDisplayName(chat) : '';
-    deleteChatFromList(activeChatId, name);
+    deleteChatFromList(activeChatId, name, true);
   });
   document.getElementById('btnCloseGroupSettings').addEventListener('click', function(){
     groupSettingsModal.classList.remove('show');
