@@ -1241,6 +1241,25 @@
 
       <div class="settings-divider"></div>
 
+      <div class="panel-section-title" style="margin:0 0 6px;">Ubah Password</div>
+      <div class="auth-error" id="changePassError"></div>
+      <div class="auth-success-msg" id="changePassSuccess"></div>
+      <div class="field">
+        <label>Password Saat Ini</label>
+        <input type="password" id="changePassCurrent" placeholder="Password yang sedang dipakai" autocomplete="current-password">
+      </div>
+      <div class="field">
+        <label>Password Baru</label>
+        <input type="password" id="changePassNew" placeholder="Minimal 6 karakter" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label>Konfirmasi Password Baru</label>
+        <input type="password" id="changePassConfirm" placeholder="Ulangi password baru" autocomplete="new-password">
+      </div>
+      <button class="btn small primary" id="btnChangePassword" type="button">Ubah Password</button>
+
+      <div class="settings-divider"></div>
+
       <div class="panel-section-title" style="margin:16px 0 6px;">Permintaan Masuk</div>
       <div id="incomingRequestsWrap"><div class="empty-hint">Tidak ada permintaan masuk.</div></div>
 
@@ -1689,6 +1708,11 @@
     settingsStatusInput.value = currentUser.status || '';
     document.getElementById('settingsMyEmail').value = currentUser.email || '';
     updateMyAvatarEls();
+    document.getElementById('changePassError').style.display = 'none';
+    document.getElementById('changePassSuccess').style.display = 'none';
+    document.getElementById('changePassCurrent').value = '';
+    document.getElementById('changePassNew').value = '';
+    document.getElementById('changePassConfirm').value = '';
     modalSettings.classList.add('show');
   }
   document.getElementById('btnSettings').addEventListener('click', function(){
@@ -2037,6 +2061,70 @@
         resetPassError.style.display = 'block';
       })
       .finally(function(){ btn.disabled = false; });
+  });
+
+  // ---------------------------------------------------------------
+  // Ubah Password (dari dalam Pengaturan Akun, saat sudah login)
+  // ---------------------------------------------------------------
+  const changePassError = document.getElementById('changePassError');
+  const changePassSuccess = document.getElementById('changePassSuccess');
+  const changePassCurrent = document.getElementById('changePassCurrent');
+  const changePassNew = document.getElementById('changePassNew');
+  const changePassConfirm = document.getElementById('changePassConfirm');
+
+  document.getElementById('btnChangePassword').addEventListener('click', function(){
+    changePassError.style.display = 'none';
+    changePassSuccess.style.display = 'none';
+
+    let curPass = changePassCurrent.value;
+    let newPass = changePassNew.value;
+    let confirmPass = changePassConfirm.value;
+
+    if (!curPass || !newPass || !confirmPass){
+      changePassError.textContent = 'Semua kolom password wajib diisi.';
+      changePassError.style.display = 'block';
+      return;
+    }
+    if (newPass.length < 6){
+      changePassError.textContent = 'Password baru minimal 6 karakter.';
+      changePassError.style.display = 'block';
+      return;
+    }
+    if (newPass !== confirmPass){
+      changePassError.textContent = 'Konfirmasi password baru tidak sama.';
+      changePassError.style.display = 'block';
+      return;
+    }
+
+    let user = auth.currentUser;
+    if (!user || !user.email){
+      changePassError.textContent = 'Sesi login tidak ditemukan, silakan login ulang.';
+      changePassError.style.display = 'block';
+      return;
+    }
+
+    let btn = document.getElementById('btnChangePassword');
+    btn.disabled = true;
+
+    let credential = firebase.auth.EmailAuthProvider.credential(user.email, curPass);
+    user.reauthenticateWithCredential(credential)
+      .then(function(){
+        return user.updatePassword(newPass);
+      })
+      .then(function(){
+        changePassSuccess.textContent = 'Password berhasil diubah.';
+        changePassSuccess.style.display = 'block';
+        changePassCurrent.value = '';
+        changePassNew.value = '';
+        changePassConfirm.value = '';
+      })
+      .catch(function(err){
+        changePassError.textContent = mapAuthError(err);
+        changePassError.style.display = 'block';
+      })
+      .finally(function(){
+        btn.disabled = false;
+      });
   });
 
   function resetAppState(){
