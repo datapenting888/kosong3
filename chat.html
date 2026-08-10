@@ -410,6 +410,7 @@
   .avatar-dropdown-item:hover{ background:var(--sidebar-2); }
   .avatar-dropdown-item.danger{ color:var(--danger); }
   .avatar-dropdown-item.danger:hover{ background:rgba(224,82,82,0.12); }
+  .chat-header-dropdown{ left:auto; right:0; min-width:170px; }
   .icon-btn{
     width:34px; height:34px;
     border-radius:50%;
@@ -1145,6 +1146,17 @@
           <button class="icon-btn" id="btnGroupSettings" aria-label="Pengaturan Grup" title="Pengaturan Grup" style="display:none;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </button>
+          <div class="avatar-menu-wrap">
+            <button class="icon-btn" id="btnChatHeaderMenu" aria-label="Menu obrolan" title="Menu obrolan">
+              <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="12" cy="19" r="1.9"/></svg>
+            </button>
+            <div class="avatar-dropdown chat-header-dropdown" id="chatHeaderDropdown">
+              <button class="avatar-dropdown-item danger" id="btnHeaderDeleteChat">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                Hapus Obrolan
+              </button>
+            </div>
+          </div>
         </div>
         <div class="chat-header chat-header-selection" id="chatHeaderSelection" style="display:none;">
           <button class="icon-btn" id="btnCancelSelection" aria-label="Batal">
@@ -2579,8 +2591,10 @@
       }
       let row = document.createElement('div');
       row.className = 'chat-row-wrap';
+      let isPrivateRow = chat.type !== 'group';
+      let deleteLabel = isPrivateRow ? 'Hapus pertemanan' : 'Hapus obrolan';
       row.innerHTML =
-        '<div class="chat-row-delete-bg"><button type="button" class="chat-row-delete-btn" aria-label="Hapus obrolan" title="Hapus obrolan">' +
+        '<div class="chat-row-delete-bg"><button type="button" class="chat-row-delete-btn" aria-label="' + deleteLabel + '" title="' + deleteLabel + '">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>' +
         '</button></div>' +
         '<div class="list-row chat-swipe-row' + (chatId === activeChatId ? ' active' : '') + '">' +
@@ -2593,7 +2607,13 @@
       row.querySelector('.chat-row-delete-btn').addEventListener('click', function(e){
         e.stopPropagation();
         closeOpenSwipeRow();
-        deleteChatFromList(chatId, name);
+        if (isPrivateRow){
+          let members = chat.members || {};
+          let otherUid = Object.keys(members).find(function(u){ return u !== currentUser.uid; });
+          removeFriendAndChat(chatId, otherUid, name);
+        } else {
+          deleteChatFromList(chatId, name);
+        }
       });
       wrap.appendChild(row);
     });
@@ -2716,6 +2736,35 @@
     // kalau chat ini sedang dibuka.
   }
 
+  function removeFriendAndChat(chatId, otherUid, name){
+    if (!otherUid) return;
+    let msg = 'Hapus pertemanan dengan "' + name + '"? Orang ini akan hilang dari daftar chat kamu. Kalau suatu saat ingin ngobrol lagi, cari namanya lewat kolom pencarian untuk mulai percakapan baru yang masih kosong.';
+    if (!confirm(msg)) return;
+
+    // Hapus pertemanan dua arah, hapus chat dari daftar kedua pihak,
+    // dan hapus juga isi percakapannya supaya kalau nanti berteman
+    // lagi, obrolannya benar-benar mulai dari kosong/fresh.
+    let updates = {};
+    updates['friends/' + currentUser.uid + '/' + otherUid] = null;
+    updates['friends/' + otherUid + '/' + currentUser.uid] = null;
+    updates['userChats/' + currentUser.uid + '/' + chatId] = null;
+    updates['userChats/' + otherUid + '/' + chatId] = null;
+    updates['chats/' + chatId] = null;
+    db.ref().update(updates).then(function(){
+      if (activeChatId === chatId){
+        activeChatId = null;
+        detachMessagesListener();
+        chatEmptyState.style.display = 'flex';
+        chatActiveWrap.style.display = 'none';
+        mobileViewMode = 'list';
+        updateMobileView();
+        clearSavedActiveChat();
+      }
+    }).catch(function(err){
+      alert('Gagal menghapus pertemanan: ' + err.message);
+    });
+  }
+
   function openPrivateChat(friendUid, friendName){
     let chatId = privateChatId(currentUser.uid, friendUid);
     db.ref('chats/' + chatId).once('value').then(function(snap){
@@ -2832,6 +2881,27 @@
   }
   document.getElementById('btnGroupSettings').addEventListener('click', function(){
     if (activeChatId) openGroupSettings(activeChatId);
+  });
+
+  // Menu titik-tiga di header obrolan aktif -> "Hapus Obrolan"
+  // (hanya menghapus pesan-pesannya, obrolan/teman tetap ada di daftar,
+  // sama seperti aksi tong sampah versi lama).
+  const chatHeaderDropdown = document.getElementById('chatHeaderDropdown');
+  document.getElementById('btnChatHeaderMenu').addEventListener('click', function(e){
+    e.stopPropagation();
+    chatHeaderDropdown.classList.toggle('show');
+  });
+  document.addEventListener('click', function(e){
+    if (!chatHeaderDropdown.contains(e.target) && e.target.id !== 'btnChatHeaderMenu'){
+      chatHeaderDropdown.classList.remove('show');
+    }
+  });
+  document.getElementById('btnHeaderDeleteChat').addEventListener('click', function(){
+    chatHeaderDropdown.classList.remove('show');
+    if (!activeChatId) return;
+    let chat = chatsIndex[activeChatId];
+    let name = chat ? chatDisplayName(chat) : '';
+    deleteChatFromList(activeChatId, name);
   });
   document.getElementById('btnCloseGroupSettings').addEventListener('click', function(){
     groupSettingsModal.classList.remove('show');
