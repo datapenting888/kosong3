@@ -1242,23 +1242,30 @@
       <div class="settings-divider"></div>
 
       <div class="panel-section-title" style="margin:0 0 6px;">Ubah Password</div>
-      <div class="auth-error" id="changePassError"></div>
-      <div class="auth-success-msg" id="changePassSuccess"></div>
-      <div class="field">
-        <label>Password Saat Ini</label>
-        <input type="password" id="changePassCurrent" placeholder="Password yang sedang dipakai" autocomplete="current-password">
-      </div>
-      <div class="field">
-        <label>Password Baru</label>
-        <input type="password" id="changePassNew" placeholder="Minimal 6 karakter" autocomplete="new-password">
-      </div>
-      <div class="field">
-        <label>Konfirmasi Password Baru</label>
-        <input type="password" id="changePassConfirm" placeholder="Ulangi password baru" autocomplete="new-password">
-      </div>
-      <button class="btn small primary" id="btnChangePassword" type="button">Ubah Password</button>
+      <button class="btn small" id="btnToggleChangePassword" type="button">Ubah Password</button>
 
-      <div class="settings-divider"></div>
+      <div id="changePassFormWrap" style="display:none; margin-top:12px;">
+        <div class="auth-error" id="changePassError"></div>
+        <div class="auth-success-msg" id="changePassSuccess"></div>
+        <div class="field">
+          <label>Password Saat Ini</label>
+          <input type="password" id="changePassCurrent" placeholder="Password yang sedang dipakai" autocomplete="current-password">
+        </div>
+        <div class="field">
+          <label>Password Baru</label>
+          <input type="password" id="changePassNew" placeholder="Minimal 6 karakter" autocomplete="new-password">
+        </div>
+        <div class="field">
+          <label>Konfirmasi Password Baru</label>
+          <input type="password" id="changePassConfirm" placeholder="Ulangi password baru" autocomplete="new-password">
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn small primary" id="btnChangePassword" type="button">Simpan Password</button>
+          <button class="btn small" id="btnCancelChangePassword" type="button">Batal</button>
+        </div>
+      </div>
+
+      <div class="settings-divider" style="margin-top:18px;"></div>
 
       <div class="panel-section-title" style="margin:16px 0 6px;">Permintaan Masuk</div>
       <div id="incomingRequestsWrap"><div class="empty-hint">Tidak ada permintaan masuk.</div></div>
@@ -1708,6 +1715,7 @@
     settingsStatusInput.value = currentUser.status || '';
     document.getElementById('settingsMyEmail').value = currentUser.email || '';
     updateMyAvatarEls();
+    document.getElementById('changePassFormWrap').style.display = 'none';
     document.getElementById('changePassError').style.display = 'none';
     document.getElementById('changePassSuccess').style.display = 'none';
     document.getElementById('changePassCurrent').value = '';
@@ -2071,6 +2079,21 @@
   const changePassCurrent = document.getElementById('changePassCurrent');
   const changePassNew = document.getElementById('changePassNew');
   const changePassConfirm = document.getElementById('changePassConfirm');
+
+  const changePassFormWrap = document.getElementById('changePassFormWrap');
+
+  document.getElementById('btnToggleChangePassword').addEventListener('click', function(){
+    let isOpen = changePassFormWrap.style.display !== 'none';
+    changePassFormWrap.style.display = isOpen ? 'none' : 'block';
+  });
+  document.getElementById('btnCancelChangePassword').addEventListener('click', function(){
+    changePassFormWrap.style.display = 'none';
+    changePassError.style.display = 'none';
+    changePassSuccess.style.display = 'none';
+    changePassCurrent.value = '';
+    changePassNew.value = '';
+    changePassConfirm.value = '';
+  });
 
   document.getElementById('btnChangePassword').addEventListener('click', function(){
     changePassError.style.display = 'none';
