@@ -3716,18 +3716,6 @@ setInterval(() => {
       <span style="font-family:'Bree Serif', serif; color:#dcdce3; font-size:14.5px;">
         Menampilkan situs Cek Nawala langsung di dalam dashboard.
       </span>
-      <!--
-        Kalau iframe di bawah gagal tampil (kosong/blank), biasanya karena
-        situs tujuan memblokir tampilan embed (iframe). Tombol ini jadi
-        cadangan supaya tetap bisa dibuka di tab baru.
-        Ganti href="..." di sini SEKALIGUS id="cekNawalaFrame" src="..." di bawah
-        kalau alamat nawala.asia berubah / tidak berfungsi lagi.
-      -->
-      <a href="https://www.nawala.asia/" target="_blank" rel="noopener noreferrer"
-         title="Buka di tab baru"
-         style="font-family:'Bree Serif', serif; font-size:16px; color:#a78bfa; text-decoration:none; opacity:0.5; padding:4px; line-height:1;">
-        &#8599;
-      </a>
     </div>
 
     <!--
@@ -4212,20 +4200,41 @@ setInterval(() => {
             return false;
         }
 
+        let copyOk = false;
+        let copyErrReason = "";
         try {
+            if (location.protocol === 'file:') {
+                // Clipboard API diblokir browser saat file dibuka langsung
+                // dari komputer (file://) karena bukan "secure context".
+                // Harus dijalankan lewat server (http://localhost... atau https://).
+                copyErrReason = "file-protocol";
+                throw new Error("Clipboard API tidak tersedia di protokol file://");
+            }
             const response = await fetch(imgElem.src);
             const blob = await response.blob();
             if (navigator.clipboard && window.ClipboardItem) {
                 await navigator.clipboard.write([
                     new ClipboardItem({ [blob.type]: blob })
                 ]);
+                copyOk = true;
+            } else {
+                copyErrReason = "no-clipboard-api";
             }
         } catch (err) {
             console.warn("Gagal menyalin gambar ke clipboard:", err);
+            if (!copyErrReason) copyErrReason = "error";
         }
 
         window.open('https://imgbb.com/', '_blank', 'noopener');
-        dsShowToast("<b>Langkah selanjutnya:</b> di tab imgbb.com, klik UNGGAH lalu klik SALIN pada tautan yang muncul. Setelah tersalin, tutup tab tersebut lalu kembali ke sini dan tempel tautannya di kolom TAUTAN pada baris ini.", 60000);
+
+        if (copyOk) {
+            dsShowToast("<b>Langkah selanjutnya:</b> di tab imgbb.com, klik UNGGAH lalu klik SALIN pada tautan yang muncul. Setelah tersalin, tutup tab tersebut lalu kembali ke sini dan tempel tautannya di kolom TAUTAN pada baris ini.", 60000);
+        } else {
+            const reasonMsg = copyErrReason === "file-protocol"
+                ? "Penyebab: file ini dibuka langsung dari komputer (file://), bukan lewat server web. Jalankan lewat localhost/hosting supaya fitur salin otomatis berfungsi."
+                : "Silakan salin gambarnya secara manual (klik kanan gambar &rarr; Salin Gambar), lalu tempel (Ctrl+V) di kolom UNGGAH pada tab imgbb.com yang baru terbuka.";
+            dsShowToast("⚠ <b>Gambar gagal disalin otomatis ke clipboard.</b><br>" + reasonMsg, 15000);
+        }
         return true;
     }
 
