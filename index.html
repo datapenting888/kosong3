@@ -3907,7 +3907,7 @@ setInterval(() => {
       font-size:15px;
       font-weight:700;
       cursor:pointer;
-      font-family:'Bree Serif', serif;
+      font-family:Arial, Helvetica, sans-serif;
     }
     .cbt-toggle .caret{
       font-size:12px;
@@ -3930,6 +3930,32 @@ setInterval(() => {
       display:none;
     }
     .cbt-list.show{ display:block; }
+    .cbt-search-wrap{
+      position:sticky;
+      top:0;
+      background: var(--bg-card);
+      padding:8px;
+      border-bottom:1px solid var(--border-soft);
+      z-index:1;
+    }
+    .cbt-search{
+      width:100%;
+      box-sizing:border-box;
+      background: rgba(255,255,255,0.05);
+      border:1px solid rgba(122,140,255,0.35);
+      border-radius:6px;
+      padding:8px 10px;
+      color: var(--text-light);
+      font-size:14px;
+      font-family:Arial, Helvetica, sans-serif;
+      outline:none;
+    }
+    .cbt-search::placeholder{ color: rgba(255,255,255,0.4); }
+    .cbt-item.empty{
+      color: rgba(255,255,255,0.4);
+      cursor:default;
+    }
+    .cbt-item.empty:hover{ background:none; }
     .cbt-item{
       padding:10px 16px;
       font-size:14.5px;
@@ -4004,7 +4030,12 @@ setInterval(() => {
           <span id="cbtLabel">-- Ketuk untuk memilih --</span>
           <span class="caret">&#9660;</span>
         </button>
-        <div class="cbt-list" id="cbtList"></div>
+        <div class="cbt-list" id="cbtList">
+          <div class="cbt-search-wrap">
+            <input type="text" class="cbt-search" id="cbtSearch" placeholder="Cari panduan..." autocomplete="off">
+          </div>
+          <div class="cbt-items" id="cbtItems"></div>
+        </div>
       </div>
 
       <div class="cbt-content" id="cbtContent"></div>
@@ -4157,9 +4188,11 @@ setInterval(() => {
     function cbtInit(){
       var toggle = document.getElementById("cbtToggle");
       var list = document.getElementById("cbtList");
+      var items = document.getElementById("cbtItems");
+      var search = document.getElementById("cbtSearch");
       var label = document.getElementById("cbtLabel");
       var content = document.getElementById("cbtContent");
-      if(!toggle || !list || !label) return;
+      if(!toggle || !list || !items || !label) return;
       if(toggle.dataset.cbtInit === "1") return;
       toggle.dataset.cbtInit = "1";
 
@@ -4186,26 +4219,34 @@ setInterval(() => {
       }
 
       function renderList(){
-        list.innerHTML = "";
+        items.innerHTML = "";
 
-        var placeholder = document.createElement("div");
-        placeholder.className = "cbt-item placeholder";
-        placeholder.textContent = "-- Ketuk untuk memilih --";
-        list.appendChild(placeholder);
+        var query = (search && search.value ? search.value : "").trim().toLowerCase();
+        var filtered = CBT_ITEMS.filter(function(name){
+          return name.toLowerCase().indexOf(query) !== -1;
+        });
 
-        CBT_ITEMS.forEach(function(name){
+        if(filtered.length === 0){
+          var empty = document.createElement("div");
+          empty.className = "cbt-item empty";
+          empty.textContent = "Tidak ditemukan";
+          items.appendChild(empty);
+          return;
+        }
+
+        filtered.forEach(function(name){
           var item = document.createElement("div");
           item.className = "cbt-item" + (cbtState.selected && name === cbtState.selected ? " active" : "");
-          item.textContent = "- " + name;
+          item.textContent = name;
           item.addEventListener("click", function(){
             cbtState.selected = name;
-            label.textContent = "- " + name;
+            label.textContent = name;
             list.classList.remove("show");
             toggle.classList.remove("open");
             renderList();
             renderContent();
           });
-          list.appendChild(item);
+          items.appendChild(item);
         });
       }
 
@@ -4213,8 +4254,19 @@ setInterval(() => {
         var willShow = !list.classList.contains("show");
         list.classList.toggle("show");
         toggle.classList.toggle("open");
-        if(willShow) renderList();
+        if(willShow){
+          renderList();
+          if(search){
+            search.value = "";
+            setTimeout(function(){ search.focus(); }, 0);
+          }
+        }
       });
+
+      if(search){
+        search.addEventListener("input", renderList);
+        search.addEventListener("click", function(e){ e.stopPropagation(); });
+      }
 
       document.addEventListener("click", function(e){
         if(!toggle.contains(e.target) && !list.contains(e.target)){
@@ -4223,7 +4275,7 @@ setInterval(() => {
         }
       });
 
-      label.textContent = cbtState.selected ? "- " + cbtState.selected : "-- Ketuk untuk memilih --";
+      label.textContent = cbtState.selected ? cbtState.selected : "-- Ketuk untuk memilih --";
       renderContent();
     }
 
