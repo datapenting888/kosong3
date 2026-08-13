@@ -3840,7 +3840,7 @@ setInterval(() => {
   </div>
 
   <style>
-    .cbt-scope{ font-family:'Bree Serif', serif; margin:20px 16px 16px; }
+    .cbt-scope{ font-family:Arial, Helvetica, sans-serif; margin:20px 16px 16px; }
     .cbt-panel{
       background:#0a0d1a;
       border:1px solid rgba(237,224,212,0.2);
@@ -4001,7 +4001,7 @@ setInterval(() => {
     <div class="cbt-panel">
       <div class="cbt-select">
         <button type="button" class="cbt-toggle" id="cbtToggle">
-          <span id="cbtLabel">- Cara Bet 4D 3D 2D</span>
+          <span id="cbtLabel">-- Ketuk untuk memilih --</span>
           <span class="caret">&#9660;</span>
         </button>
         <div class="cbt-list" id="cbtList"></div>
@@ -4123,7 +4123,7 @@ setInterval(() => {
         '<p class="cbt-subheading">Panduan taruhan kombinasi dua jenis pasaran dalam satu formasi.</p>'
     };
 
-    var cbtState = { selected: CBT_ITEMS[0] };
+    var cbtState = { selected: null };
 
     // Menyalin HANYA gambar (screenshot panduan) ke clipboard, tanpa teks.
     function cbtCopyImage(imgEl, btn){
@@ -4164,6 +4164,10 @@ setInterval(() => {
       toggle.dataset.cbtInit = "1";
 
       function renderContent(){
+        if(!cbtState.selected){
+          content.innerHTML = "";
+          return;
+        }
         if(CBT_CONTENT[cbtState.selected]){
           content.innerHTML = CBT_CONTENT[cbtState.selected];
         } else {
@@ -4191,7 +4195,7 @@ setInterval(() => {
 
         CBT_ITEMS.forEach(function(name){
           var item = document.createElement("div");
-          item.className = "cbt-item" + (name === cbtState.selected ? " active" : "");
+          item.className = "cbt-item" + (cbtState.selected && name === cbtState.selected ? " active" : "");
           item.textContent = "- " + name;
           item.addEventListener("click", function(){
             cbtState.selected = name;
@@ -4219,7 +4223,7 @@ setInterval(() => {
         }
       });
 
-      label.textContent = "- " + cbtState.selected;
+      label.textContent = cbtState.selected ? "- " + cbtState.selected : "-- Ketuk untuk memilih --";
       renderContent();
     }
 
