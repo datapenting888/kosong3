@@ -1565,6 +1565,19 @@
     <span class="label label-sm">DATA PENTING</span>
   </a>
 
+  <!--
+    Menu "CARA BETTING TOGEL" — halaman panduan cara betting togel
+    (lihat <div id="pageCaraBetting"> di bawah).
+  -->
+  <div class="nav-item" id="navCaraBetting">
+    <span class="icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+    </span>
+    <span class="label label-sm">CARA BETTING TOGEL</span>
+  </div>
+
   <div class="sidebar-footer">© 2026 RIKI GOLAN — All Rights Reserved</div>
 </div>
 
@@ -3716,6 +3729,18 @@ setInterval(() => {
       <span style="font-family:'Bree Serif', serif; color:#dcdce3; font-size:14.5px;">
         Menampilkan situs Cek Nawala langsung di dalam dashboard.
       </span>
+      <!--
+        Kalau iframe di bawah gagal tampil (kosong/blank), biasanya karena
+        situs tujuan memblokir tampilan embed (iframe). Tombol ini jadi
+        cadangan supaya tetap bisa dibuka di tab baru.
+        Ganti href="..." di sini SEKALIGUS id="cekNawalaFrame" src="..." di bawah
+        kalau alamat nawala.asia berubah / tidak berfungsi lagi.
+      -->
+      <a href="https://www.nawala.asia/" target="_blank" rel="noopener noreferrer"
+         title="Buka di tab baru"
+         style="font-family:'Bree Serif', serif; font-size:16px; color:#a78bfa; text-decoration:none; opacity:0.5; padding:4px; line-height:1;">
+        &#8599;
+      </a>
     </div>
 
     <!--
@@ -3803,6 +3828,240 @@ setInterval(() => {
       </div>
     </div>
   </div>
+</div>
+
+<!--
+  Halaman "CARA BETTING TOGEL" — panduan/isi bebas, silakan ganti teks
+  di dalam .panel di bawah sesuai kebutuhan.
+-->
+<div id="pageCaraBetting" style="display:none;">
+  <div class="topbar">
+    <h1><span>CARA BETTING TOGEL &nbsp;&nbsp; • &nbsp;&nbsp; CARA BETTING TOGEL &nbsp;&nbsp; • &nbsp;&nbsp; CARA BETTING TOGEL &nbsp;&nbsp; • &nbsp;&nbsp; CARA BETTING TOGEL &nbsp;&nbsp; • &nbsp;&nbsp; CARA BETTING TOGEL</span><span>CARA BETTING TOGEL &nbsp;&nbsp; • &nbsp;&nbsp; CARA BETTING TOGEL &nbsp;&nbsp; • &nbsp;&nbsp; CARA BETTING TOGEL &nbsp;&nbsp; • &nbsp;&nbsp; CARA BETTING TOGEL &nbsp;&nbsp; • &nbsp;&nbsp; CARA BETTING TOGEL</span></h1>
+  </div>
+
+  <style>
+    .cbt-scope{ font-family:'Bree Serif', serif; }
+    .cbt-panel{
+      background: var(--bg-card);
+      border:1px solid var(--border-soft);
+      border-radius:10px;
+      padding:16px 18px 20px;
+      box-shadow: 0 0 24px rgba(80,110,255,0.10), 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    .cbt-header{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:14px;
+    }
+    .cbt-header .cbt-icon{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:22px; height:22px;
+      border-radius:5px;
+      background: rgba(122,90,248,0.18);
+      color:#a78bfa;
+      font-size:13px;
+    }
+    .cbt-header .cbt-title{
+      color: var(--text-light);
+      font-size:15px;
+      font-weight:700;
+      letter-spacing:0.4px;
+      text-transform:uppercase;
+    }
+    .cbt-header .cbt-pill{
+      margin-left:auto;
+      width:34px; height:16px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.12);
+      border:1px solid var(--border-soft);
+      position:relative;
+      flex:none;
+    }
+    .cbt-header .cbt-pill::after{
+      content:"";
+      position:absolute;
+      top:2px; left:2px;
+      width:11px; height:11px;
+      border-radius:50%;
+      background: rgba(255,255,255,0.55);
+    }
+    .cbt-select{
+      position:relative;
+      width:100%;
+    }
+    .cbt-toggle{
+      width:100%;
+      box-sizing:border-box;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background: rgba(255,255,255,0.03);
+      border:1px solid rgba(122,140,255,0.35);
+      border-radius:8px;
+      padding:12px 16px;
+      color: var(--text-light);
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+      font-family:'Bree Serif', serif;
+    }
+    .cbt-toggle .caret{
+      font-size:12px;
+      color: var(--text-light);
+      opacity:0.7;
+      transition: transform .15s ease;
+    }
+    .cbt-toggle.open .caret{ transform: rotate(180deg); }
+    .cbt-list{
+      position:absolute;
+      top:calc(100% + 6px);
+      left:0; right:0;
+      background: var(--bg-card);
+      border:1px solid var(--border-soft);
+      border-radius:8px;
+      max-height:320px;
+      overflow-y:auto;
+      z-index:20;
+      box-shadow:0 10px 26px rgba(0,0,0,0.45);
+      display:none;
+    }
+    .cbt-list.show{ display:block; }
+    .cbt-item{
+      padding:10px 16px;
+      font-size:14.5px;
+      color: var(--text-light);
+      cursor:pointer;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .cbt-item:hover{ background: rgba(255,255,255,0.06); }
+    .cbt-item.active{ background:#2f6fed; color:#fff; }
+    .cbt-item.placeholder{
+      color: rgba(255,255,255,0.4);
+      cursor:default;
+    }
+    .cbt-item.placeholder:hover{ background:none; }
+    .cbt-content{
+      margin-top:16px;
+      color:#dcdce3;
+      font-size:14.5px;
+      line-height:1.7;
+    }
+  </style>
+
+  <div class="cbt-scope">
+    <div class="cbt-panel">
+      <div class="cbt-header">
+        <span class="cbt-icon">&#128203;</span>
+        <span class="cbt-title">Daftar Cara Betting Togel</span>
+        <span class="cbt-pill"></span>
+      </div>
+
+      <div class="cbt-select">
+        <button type="button" class="cbt-toggle" id="cbtToggle">
+          <span id="cbtLabel">- Cara Bet 4D 3D 2D</span>
+          <span class="caret">&#9660;</span>
+        </button>
+        <div class="cbt-list" id="cbtList"></div>
+      </div>
+
+      <div class="cbt-content" id="cbtContent"></div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    var CBT_ITEMS = [
+      "Cara Bet 4D 3D 2D",
+      "Cara Bet Bb",
+      "Cara Bet Bbfs (Bb Campuran)",
+      "Cara Bet Angka Tarung",
+      "Cara Bet Fast 4D",
+      "Cara Bet 4D, 3D, 2D Easy",
+      "Cara Bet 3D",
+      "Cara Bet 2D Belakang",
+      "Cara Bet 2D Depan",
+      "Cara Bet 2D Tengah",
+      "Cara Bet Colok Bebas",
+      "Cara Bet Colok Bebas 2D",
+      "Cara Bet Colok Naga",
+      "Cara Bermain Colok Jitu",
+      "Cara Bermain Tengah Tepi",
+      "Cara Bermain Togel Menu Bet [Dasar]",
+      "Cara Bermain Dan Bet Togel 50-50",
+      "Cara Betting Shio",
+      "Cara Bermain Silang Homo",
+      "Cara Bermain Kembang Kempis",
+      "Cara Bermain Kombinasi"
+    ];
+
+    var cbtState = { selected: CBT_ITEMS[0] };
+
+    function cbtInit(){
+      var toggle = document.getElementById("cbtToggle");
+      var list = document.getElementById("cbtList");
+      var label = document.getElementById("cbtLabel");
+      var content = document.getElementById("cbtContent");
+      if(!toggle || !list || !label) return;
+      if(toggle.dataset.cbtInit === "1") return;
+      toggle.dataset.cbtInit = "1";
+
+      function renderContent(){
+        content.textContent = "Konten panduan \"" + cbtState.selected + "\" bisa diisi di sini.";
+      }
+
+      function renderList(){
+        list.innerHTML = "";
+
+        var placeholder = document.createElement("div");
+        placeholder.className = "cbt-item placeholder";
+        placeholder.textContent = "-- Ketuk untuk memilih --";
+        list.appendChild(placeholder);
+
+        CBT_ITEMS.forEach(function(name){
+          var item = document.createElement("div");
+          item.className = "cbt-item" + (name === cbtState.selected ? " active" : "");
+          item.textContent = "- " + name;
+          item.addEventListener("click", function(){
+            cbtState.selected = name;
+            label.textContent = "- " + name;
+            list.classList.remove("show");
+            toggle.classList.remove("open");
+            renderList();
+            renderContent();
+          });
+          list.appendChild(item);
+        });
+      }
+
+      toggle.addEventListener("click", function(){
+        var willShow = !list.classList.contains("show");
+        list.classList.toggle("show");
+        toggle.classList.toggle("open");
+        if(willShow) renderList();
+      });
+
+      document.addEventListener("click", function(e){
+        if(!toggle.contains(e.target) && !list.contains(e.target)){
+          list.classList.remove("show");
+          toggle.classList.remove("open");
+        }
+      });
+
+      label.textContent = "- " + cbtState.selected;
+      renderContent();
+    }
+
+    cbtInit();
+    var navCaraBettingEl = document.getElementById("navCaraBetting");
+    if(navCaraBettingEl) navCaraBettingEl.addEventListener("click", cbtInit);
+  })();
+  </script>
 </div>
 
 <div id="dsImgModal" class="ds-modal">
@@ -4200,41 +4459,20 @@ setInterval(() => {
             return false;
         }
 
-        let copyOk = false;
-        let copyErrReason = "";
         try {
-            if (location.protocol === 'file:') {
-                // Clipboard API diblokir browser saat file dibuka langsung
-                // dari komputer (file://) karena bukan "secure context".
-                // Harus dijalankan lewat server (http://localhost... atau https://).
-                copyErrReason = "file-protocol";
-                throw new Error("Clipboard API tidak tersedia di protokol file://");
-            }
             const response = await fetch(imgElem.src);
             const blob = await response.blob();
             if (navigator.clipboard && window.ClipboardItem) {
                 await navigator.clipboard.write([
                     new ClipboardItem({ [blob.type]: blob })
                 ]);
-                copyOk = true;
-            } else {
-                copyErrReason = "no-clipboard-api";
             }
         } catch (err) {
             console.warn("Gagal menyalin gambar ke clipboard:", err);
-            if (!copyErrReason) copyErrReason = "error";
         }
 
         window.open('https://imgbb.com/', '_blank', 'noopener');
-
-        if (copyOk) {
-            dsShowToast("<b>Langkah selanjutnya:</b> di tab imgbb.com, klik UNGGAH lalu klik SALIN pada tautan yang muncul. Setelah tersalin, tutup tab tersebut lalu kembali ke sini dan tempel tautannya di kolom TAUTAN pada baris ini.", 60000);
-        } else {
-            const reasonMsg = copyErrReason === "file-protocol"
-                ? "Penyebab: file ini dibuka langsung dari komputer (file://), bukan lewat server web. Jalankan lewat localhost/hosting supaya fitur salin otomatis berfungsi."
-                : "Silakan salin gambarnya secara manual (klik kanan gambar &rarr; Salin Gambar), lalu tempel (Ctrl+V) di kolom UNGGAH pada tab imgbb.com yang baru terbuka.";
-            dsShowToast("⚠ <b>Gambar gagal disalin otomatis ke clipboard.</b><br>" + reasonMsg, 15000);
-        }
+        dsShowToast("<b>Langkah selanjutnya:</b> di tab imgbb.com, klik UNGGAH lalu klik SALIN pada tautan yang muncul. Setelah tersalin, tutup tab tersebut lalu kembali ke sini dan tempel tautannya di kolom TAUTAN pada baris ini.", 60000);
         return true;
     }
 
@@ -5805,7 +6043,8 @@ setInterval(() => {
       bola: document.getElementById("navBola"),
       hasilJadwal: document.getElementById("navHasilJadwal"),
       cekNawala: document.getElementById("navCekNawala"),
-      dataScreenshot: document.getElementById("navDataScreenshot")
+      dataScreenshot: document.getElementById("navDataScreenshot"),
+      caraBetting: document.getElementById("navCaraBetting")
     };
     var pages = {
       prediksi: document.getElementById("pagePrediksi"),
@@ -5814,7 +6053,8 @@ setInterval(() => {
       bola: document.getElementById("pageBola"),
       hasilJadwal: document.getElementById("pageHasilJadwal"),
       cekNawala: document.getElementById("pageCekNawala"),
-      dataScreenshot: document.getElementById("pageDataScreenshot")
+      dataScreenshot: document.getElementById("pageDataScreenshot"),
+      caraBetting: document.getElementById("pageCaraBetting")
     };
 
     var ACTIVE_PAGE_KEY = 'dashboardActivePage';
@@ -5834,6 +6074,7 @@ setInterval(() => {
     navs.hasilJadwal.addEventListener("click", function(){ showPage("hasilJadwal"); });
     navs.cekNawala.addEventListener("click", function(){ showPage("cekNawala"); });
     navs.dataScreenshot.addEventListener("click", function(){ showPage("dataScreenshot"); });
+    navs.caraBetting.addEventListener("click", function(){ showPage("caraBetting"); });
 
     var savedPage = localStorage.getItem(ACTIVE_PAGE_KEY);
     showPage(pages[savedPage] ? savedPage : "prediksi");
