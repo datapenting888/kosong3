@@ -23,6 +23,35 @@
             margin: 0 auto;
         }
 
+        @property --angle {
+            syntax: '<angle>';
+            inherits: false;
+            initial-value: 0deg;
+        }
+
+        @keyframes spin-border {
+            to { --angle: 360deg; }
+        }
+
+        .glow-border {
+            position: relative;
+        }
+
+        .glow-border::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            border-radius: inherit;
+            padding: 2px;
+            background: conic-gradient(from var(--angle), #76ff03, #00e676, #00b0ff, #76ff03);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: spin-border 4s linear infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
         /* Header Title */
         .main-header {
             text-align: center;
@@ -428,6 +457,48 @@
             padding: 40px 10px;
         }
 
+        /* Detail Perhitungan (Parlay) */
+        .result-detail-box {
+            background-color: #0d1711;
+            border: 1px solid #1e3828;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .result-detail-title {
+            font-size: 11px;
+            color: #a0b0a5;
+            letter-spacing: 0.5px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .result-detail-heading {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .result-detail-list {
+            font-size: 12px;
+            color: #cfe9d6;
+            line-height: 1.8;
+        }
+
+        .result-detail-divider {
+            border-top: 1px solid #1e3828;
+            margin: 10px 0;
+        }
+
+        .result-detail-formula {
+            font-size: 12px;
+            color: #00e676;
+            font-weight: 600;
+        }
+
         /* Parlay dynamic match rows */
         .parlay-matches-wrap {
             margin-bottom: 15px;
@@ -485,28 +556,28 @@
 
 <div class="container">
     <!-- Header -->
-    <div class="main-header">
+    <div class="main-header glow-border">
         Bantuan Untuk Perhitungan ODDS
     </div>
 
     <!-- Steps -->
     <div class="steps-grid">
-        <div class="step-card">
+        <div class="step-card glow-border">
             <div class="step-badge">1</div>
             <h4>Pilih Menu</h4>
             <p>Pilih jenis kalkulator yang ingin digunakan.</p>
         </div>
-        <div class="step-card">
+        <div class="step-card glow-border">
             <div class="step-badge">2</div>
             <h4>Baca Arahan</h4>
             <p>Lihat penjelasan singkat dan contohnya.</p>
         </div>
-        <div class="step-card">
+        <div class="step-card glow-border">
             <div class="step-badge">3</div>
             <h4>Isi Data</h4>
             <p>Masukkan modal, odds, atau angka yang diperlukan.</p>
         </div>
-        <div class="step-card">
+        <div class="step-card glow-border">
             <div class="step-badge">4</div>
             <h4>Hasil Hasil</h4>
             <p>Hasil langsung tampil jelas di panel kanan.</p>
@@ -523,7 +594,7 @@
 
     <!-- ============ TAB 1: SINGLE BET ============ -->
     <div class="content-layout tab-panel active" id="panel1">
-        <div class="calc-panel">
+        <div class="calc-panel glow-border">
             <div class="calc-title">
                 <span>1</span> Single Bet (Taruhan Tunggal)
             </div>
@@ -589,7 +660,7 @@
             </div>
         </div>
 
-        <div class="result-panel">
+        <div class="result-panel glow-border">
             <div>
                 <div class="result-header">
                     <span class="result-dot"></span> Panel Hasil
@@ -623,7 +694,7 @@
 
     <!-- ============ TAB 2: PARLAY ============ -->
     <div class="content-layout tab-panel" id="panel2">
-        <div class="calc-panel">
+        <div class="calc-panel glow-border">
             <div class="calc-title">
                 <span>2</span> Parlay
             </div>
@@ -710,7 +781,7 @@
             </div>
         </div>
 
-        <div class="result-panel">
+        <div class="result-panel glow-border">
             <div>
                 <div class="result-header">
                     <span class="result-dot"></span> Panel Hasil
@@ -737,6 +808,13 @@
                         <div class="value" id="plResStatus">Bersih</div>
                     </div>
                 </div>
+                <div class="result-detail-box" id="plDetailBox" style="display:none;">
+                    <div class="result-detail-title">DETAIL PERHITUNGAN</div>
+                    <div class="result-detail-heading">Rincian</div>
+                    <div class="result-detail-list" id="plDetailList"></div>
+                    <div class="result-detail-divider"></div>
+                    <div class="result-detail-formula" id="plDetailFormula"></div>
+                </div>
             </div>
             <button class="btn-clear-result" onclick="resetParlay()">Bersihkan Hasil</button>
         </div>
@@ -745,7 +823,7 @@
     <!-- ============ TAB 3: TARGET PROFIT / KEI ============ -->
     <div class="content-layout tab-panel" id="panel3">
         <!-- Calculator Input Area -->
-        <div class="calc-panel">
+        <div class="calc-panel glow-border">
             <div class="calc-title">
                 <span>3</span> Target Profit / KEI
             </div>
@@ -779,7 +857,7 @@
         </div>
 
         <!-- Result Panel -->
-        <div class="result-panel">
+        <div class="result-panel glow-border">
             <div>
                 <div class="result-header">
                     <span class="result-dot"></span> Panel Hasil
@@ -813,7 +891,7 @@
 
     <!-- ============ TAB 4: CASH OUT ============ -->
     <div class="content-layout tab-panel" id="panel4">
-        <div class="calc-panel">
+        <div class="calc-panel glow-border">
             <div class="calc-title"><span>4</span> Cash Out</div>
 
             <div class="input-group-grid">
@@ -833,7 +911,7 @@
             </div>
         </div>
 
-        <div class="result-panel">
+        <div class="result-panel glow-border">
             <div>
                 <div class="result-header">
                     <span class="result-dot"></span> Panel Hasil
@@ -1095,6 +1173,23 @@
         let statusEl = document.getElementById('plResStatus');
         statusEl.innerText = statusText;
         statusEl.style.color = statusColor;
+
+        // Detail Perhitungan
+        let hasilLabel = {
+            win: "WIN",
+            lose: "LOSE",
+            void: "VOID",
+            hwin: "H-WIN",
+            hlose: "H-LOSE"
+        };
+        let listHtml = legs.map((leg, i) => `Match ${i + 1}: ${hasilLabel[leg.hasil]}`).join("<br>");
+        document.getElementById('plDetailList').innerHTML = listHtml;
+
+        let modalFmt = Math.round(modal).toLocaleString('id-ID');
+        let payoutFmt = Math.round(payout).toLocaleString('id-ID');
+        document.getElementById('plDetailFormula').innerText =
+            `Hitung: Rp ${modalFmt} x ${totalOdds.toFixed(3)} = Rp ${payoutFmt}`;
+        document.getElementById('plDetailBox').style.display = "block";
     }
 
     function contohParlay() {
@@ -1123,6 +1218,10 @@
         let statusEl = document.getElementById('plResStatus');
         statusEl.innerText = "Bersih";
         statusEl.style.color = "#fff";
+
+        document.getElementById('plDetailBox').style.display = "none";
+        document.getElementById('plDetailList').innerHTML = "";
+        document.getElementById('plDetailFormula').innerText = "";
     }
 
     /* ===== TAB 4: CASH OUT ===== */
