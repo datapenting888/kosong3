@@ -3979,6 +3979,22 @@ setInterval(() => {
     .cbt-content .cbt-purple{ color:#b48cff; font-weight:700; }
     .cbt-content .cbt-green{ color:#2bd9a5; font-weight:700; }
     .cbt-content .cbt-white-bold{ color:#fff; font-weight:700; }
+    .cbt-copybtn{
+      display:block;
+      background-color:#3a1b5e;
+      color:#ffffff;
+      border:none;
+      width:100%;
+      max-width:280px;
+      padding:10px 14px;
+      border-radius:8px;
+      font-weight:bold;
+      font-size:14.5px;
+      cursor:pointer;
+      transition:0.3s;
+      margin:10px 0 16px;
+    }
+    .cbt-copybtn:hover{ background-color:#4d2680; }
   </style>
 
   <div class="cbt-scope">
@@ -4045,6 +4061,35 @@ setInterval(() => {
 
     var cbtState = { selected: CBT_ITEMS[0] };
 
+    // Menyalin HANYA gambar (screenshot panduan) ke clipboard, tanpa teks.
+    function cbtCopyImage(imgEl, btn){
+      var originalText = btn.textContent;
+      function showResult(ok){
+        btn.textContent = ok ? "\u2705 GAMBAR TERSALIN" : "GAGAL, COBA LAGI";
+        btn.style.backgroundColor = ok ? "#28a745" : "#c0392b";
+        setTimeout(function(){
+          btn.textContent = originalText;
+          btn.style.backgroundColor = "";
+        }, 1500);
+      }
+      if(!navigator.clipboard || !window.ClipboardItem){
+        alert("Browser ini tidak mendukung salin gambar ke clipboard.");
+        return;
+      }
+      fetch(imgEl.src)
+        .then(function(res){ return res.blob(); })
+        .then(function(blob){
+          return navigator.clipboard.write([
+            new ClipboardItem({ [blob.type]: blob })
+          ]);
+        })
+        .then(function(){ showResult(true); })
+        .catch(function(err){
+          console.warn("Gagal menyalin gambar:", err);
+          showResult(false);
+        });
+    }
+
     function cbtInit(){
       var toggle = document.getElementById("cbtToggle");
       var list = document.getElementById("cbtList");
@@ -4059,6 +4104,16 @@ setInterval(() => {
           content.innerHTML = CBT_CONTENT[cbtState.selected];
         } else {
           content.textContent = "Konten panduan \"" + cbtState.selected + "\" bisa diisi di sini.";
+          return;
+        }
+        var img = content.querySelector("img");
+        if(img){
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "cbt-copybtn";
+          btn.textContent = "\uD83D\uDCCB SALIN GAMBAR";
+          btn.addEventListener("click", function(){ cbtCopyImage(img, btn); });
+          img.insertAdjacentElement("afterend", btn);
         }
       }
 
