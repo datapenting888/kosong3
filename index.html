@@ -1275,11 +1275,11 @@
         // Nominal Cash Out = uang yang diterima sekarang (payout)
         let payout = cashOut;
         let profit = payout - modal;
-        // Odds Akhir = odds efektif yang didapat dari hasil cash out (Payout / Modal)
-        let oddsAkhir = payout / modal;
 
         document.getElementById('coResModal').innerText = "Rp " + Math.round(modal).toLocaleString('id-ID');
-        document.getElementById('coResOdds').innerText = oddsAkhir.toFixed(3);
+        // Cash Out tidak memiliki konsep "odds akhir" seperti taruhan biasa,
+        // karena nominal cash out sudah ditentukan langsung oleh bandar/platform.
+        document.getElementById('coResOdds').innerText = "0.000";
         document.getElementById('coResPayout').innerText = "Rp " + Math.round(payout).toLocaleString('id-ID');
 
         let profitEl = document.getElementById('coResProfit');
@@ -1287,17 +1287,11 @@
         profitEl.innerText = prefix + Math.round(Math.abs(profit)).toLocaleString('id-ID');
         profitEl.style.color = profit >= 0 ? "#00e676" : "#ff5252";
 
+        // Status Cash Out selalu menandakan transaksi sudah selesai/terkunci,
+        // terlepas dari untung atau rugi (sesuai sifat cash out itu sendiri).
         let statusEl = document.getElementById('coResStatus');
-        if (profit > 0) {
-            statusEl.innerText = "UNTUNG";
-            statusEl.style.color = "#00e676";
-        } else if (profit < 0) {
-            statusEl.innerText = "RUGI";
-            statusEl.style.color = "#ff5252";
-        } else {
-            statusEl.innerText = "IMPAS";
-            statusEl.style.color = "#ffca28";
-        }
+        statusEl.innerText = "CASHOUT SELESAI";
+        statusEl.style.color = "#ffffff";
     }
 
     function resetCashOut() {
