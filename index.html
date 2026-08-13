@@ -33,6 +33,11 @@
             to { --angle: 360deg; }
         }
 
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.25; }
+            50% { opacity: 1; }
+        }
+
         .glow-border {
             position: relative;
         }
@@ -47,7 +52,7 @@
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
-            animation: spin-border 4s linear infinite;
+            animation: spin-border 4s linear infinite, pulse-glow 2s ease-in-out infinite;
             pointer-events: none;
             z-index: 1;
         }
@@ -687,6 +692,13 @@
                         <div class="value" id="sbResStatus">Bersih</div>
                     </div>
                 </div>
+                <div class="result-detail-box" id="sbDetailBox" style="display:none;">
+                    <div class="result-detail-title">DETAIL PERHITUNGAN</div>
+                    <div class="result-detail-heading">Rincian</div>
+                    <div class="result-detail-list" id="sbDetailList"></div>
+                    <div class="result-detail-divider"></div>
+                    <div class="result-detail-formula" id="sbDetailFormula"></div>
+                </div>
             </div>
             <button class="btn-clear-result" onclick="resetSingleBet()">Bersihkan Hasil</button>
         </div>
@@ -1025,6 +1037,28 @@
         let statusEl = document.getElementById('sbResStatus');
         statusEl.innerText = statusText;
         statusEl.style.color = statusColor;
+
+        // Detail Perhitungan
+        let hasilLabel = {
+            menang: "WIN",
+            kalah: "LOSE",
+            void: "VOID",
+            halfwin: "H-WIN",
+            halflose: "H-LOSE",
+            cashout: "CASH OUT"
+        };
+        document.getElementById('sbDetailList').innerHTML = `Match 1: ${hasilLabel[hasil]}`;
+
+        let modalFmt = Math.round(modal).toLocaleString('id-ID');
+        let formulaText = "";
+        if (hasil === "cashout") {
+            formulaText = "Gunakan menu Cash Out untuk menghitung tiket ini.";
+        } else {
+            let payoutFmt = Math.round(payout).toLocaleString('id-ID');
+            formulaText = `Hitung: Rp ${modalFmt} x ${odds.toFixed(3)} = Rp ${payoutFmt}`;
+        }
+        document.getElementById('sbDetailFormula').innerText = formulaText;
+        document.getElementById('sbDetailBox').style.display = "block";
     }
 
     function contohSingleBet() {
@@ -1047,6 +1081,10 @@
         let statusEl = document.getElementById('sbResStatus');
         statusEl.innerText = "Bersih";
         statusEl.style.color = "#fff";
+
+        document.getElementById('sbDetailBox').style.display = "none";
+        document.getElementById('sbDetailList').innerHTML = "";
+        document.getElementById('sbDetailFormula').innerText = "";
     }
 
     /* ===== TAB 2: PARLAY ===== */
