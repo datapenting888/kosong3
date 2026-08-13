@@ -3840,13 +3840,13 @@ setInterval(() => {
   </div>
 
   <style>
-    .cbt-scope{ font-family:'Bree Serif', serif; }
+    .cbt-scope{ font-family:'Bree Serif', serif; margin:20px 16px 16px; }
     .cbt-panel{
-      background: var(--bg-card);
-      border:1px solid var(--border-soft);
-      border-radius:10px;
-      padding:16px 18px 20px;
-      box-shadow: 0 0 24px rgba(80,110,255,0.10), 0 0 0 1px rgba(255,255,255,0.04);
+      background:#0a0d1a;
+      border:1px solid rgba(237,224,212,0.2);
+      border-radius:15px;
+      padding:20px;
+      box-shadow: 0 0 30px rgba(255,255,255,0.12), 0 0 0 1px rgba(255,255,255,0.06);
     }
     .cbt-header{
       display:flex;
@@ -3952,6 +3952,25 @@ setInterval(() => {
       font-size:14.5px;
       line-height:1.7;
     }
+    .cbt-content .cbt-heading{
+      color:#fff;
+      font-weight:700;
+      font-size:15.5px;
+      margin:0 0 14px;
+    }
+    .cbt-content .cbt-subheading{
+      color:#fff;
+      font-weight:700;
+      margin:14px 0 8px;
+    }
+    .cbt-content .cbt-step{ margin-bottom:12px; }
+    .cbt-content .cbt-num{ font-weight:700; color:#dcdce3; margin-right:2px; }
+    .cbt-content .cbt-example{ margin:0 0 12px; }
+    .cbt-content .cbt-red{ color:#ff5c5c; font-weight:700; }
+    .cbt-content .cbt-yellow{ color:#ffb020; font-weight:700; }
+    .cbt-content .cbt-purple{ color:#b48cff; font-weight:700; }
+    .cbt-content .cbt-green{ color:#2bd9a5; font-weight:700; }
+    .cbt-content .cbt-white-bold{ color:#fff; font-weight:700; }
   </style>
 
   <div class="cbt-scope">
@@ -4000,6 +4019,21 @@ setInterval(() => {
       "Cara Bermain Kombinasi"
     ];
 
+    var CBT_CONTENT = {
+      "Cara Bet 4D 3D 2D":
+        '<p class="cbt-heading">Berikut Cara pembelian 4D 3D 2D :</p>' +
+        '<div class="cbt-step"><span class="cbt-num">1.</span> Pilih pasaran yang ingin anda mainkan.</div>' +
+        '<div class="cbt-step"><span class="cbt-num">2.</span> Pilih menu 4D 3D 2D</div>' +
+        '<div class="cbt-step"><span class="cbt-num">3.</span> <span class="cbt-red">Lalu pilih Tipe bettingan yang ingin anda gunakan (FULL-DISKON-BB-PRIZE123)</span></div>' +
+        '<div class="cbt-step"><span class="cbt-num">4.</span> <span class="cbt-yellow">Silahkan isi kolom pertama dengan angka yang ingin anda beli. Contoh: &ldquo;1234&rdquo;</span></div>' +
+        '<div class="cbt-step"><span class="cbt-num">5.</span> <span class="cbt-purple">Pada kolom berikutnya (Kolom 4D/3D/2D) diisi dengan nominal jumlah bettingan anda</span></div>' +
+        '<p class="cbt-subheading">Contoh:</p>' +
+        '<div class="cbt-example">- Pembelian Rp.100 untuk 4D maka pada kolom 4D cukup diisi dengan angka (0.1)<br>' +
+        'Pembelian Rp.500 untuk 3D maka pada kolom 3D cukup diisi dengan angka (0.5)<br>' +
+        '-Pembelian Rp.1.000 untuk 2D maka pada kolom 2D cukup diisi dengan angka (1)</div>' +
+        '<div class="cbt-step"><span class="cbt-num">6.</span> Klik <span class="cbt-white-bold">CALCULATE</span> Periksa kembali seluruh rincian pembelian anda jika semua sudah benar &amp; sesuai, Tekan <span class="cbt-green">SUBMIT</span>.</div>'
+    };
+
     var cbtState = { selected: CBT_ITEMS[0] };
 
     function cbtInit(){
@@ -4012,7 +4046,11 @@ setInterval(() => {
       toggle.dataset.cbtInit = "1";
 
       function renderContent(){
-        content.textContent = "Konten panduan \"" + cbtState.selected + "\" bisa diisi di sini.";
+        if(CBT_CONTENT[cbtState.selected]){
+          content.innerHTML = CBT_CONTENT[cbtState.selected];
+        } else {
+          content.textContent = "Konten panduan \"" + cbtState.selected + "\" bisa diisi di sini.";
+        }
       }
 
       function renderList(){
