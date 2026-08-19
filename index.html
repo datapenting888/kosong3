@@ -261,53 +261,62 @@
     text-align:center; font-family: var(--mono);
   }
 
-  /* ---------- FAQ / Q&A view (mis. sheet BOLAA) — meniru layout spreadsheet asli ---------- */
+  /* ---------- FAQ / dokumen view (mis. sheet BOLAA) — meniru layout spreadsheet asli ---------- */
   .faq-container{
-    display:flex; flex-direction:column; gap:8px; padding: 14px;
+    display:flex; flex-direction:column; gap:6px; padding: 14px;
     background: #05070a; border-radius: 8px;
   }
   .faq-title{
-    background: linear-gradient(135deg, #2f8f3e, #1c6b2a);
-    color:#fff; font-family: var(--display); font-weight:800; font-size:13px;
-    letter-spacing:0.05em; text-transform:uppercase; text-align:center;
-    padding: 10px 16px; border-radius:6px;
+    color:#4fe0c4; font-family: var(--display); font-weight:800; font-size:14px;
+    letter-spacing:0.06em; text-transform:uppercase; text-align:center;
+    padding: 10px 16px;
+  }
+
+  /* Kartu link (mis. LINK BOLA) — putih, meniru tampilan asli */
+  .faq-link-card{
+    background:#f4f6f8; border-radius:8px; overflow:hidden;
+    border:1px solid #d7dce2; margin-bottom: 4px;
   }
   .faq-link-row{
-    display:flex; align-items:center; gap:14px;
-    background: #0a0d11; border-bottom: 1px solid #1a1f27;
-    padding:9px 14px; flex-wrap:wrap;
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    padding:9px 14px; border-bottom:1px solid #e2e6ea;
   }
+  .faq-link-row:last-child{ border-bottom:none; }
   .faq-link-label{
-    font-weight:800; color:#4ade80; font-size:12.5px; font-family: var(--sans);
+    font-weight:800; color:#0f172a; font-size:12.5px; font-family: var(--sans);
     white-space:nowrap; min-width:150px;
   }
   .faq-link{
-    color:#7cc7ff; font-family: var(--mono); font-size:12.5px; text-decoration:underline;
+    color:#1a56db; font-family: var(--mono); font-size:12.5px; text-decoration:underline;
     word-break:break-all; display:inline-flex; align-items:center; gap:5px;
   }
-  .faq-link:hover{ color: var(--teal); }
+  .faq-link:hover{ color:#0d3fa8; }
 
+  /* Kartu topik / pertanyaan-jawaban / contoh */
   .faq-card{
     display:flex; align-items:stretch; border-radius:6px; overflow:hidden;
-    background:#0a0d11;
+    background:#0a0d11; border-left: 3px solid transparent;
   }
   .faq-card .label{
-    flex:0 0 118px; display:flex; align-items:center; justify-content:center;
-    text-align:center; padding:10px 8px;
+    flex:0 0 130px; display:flex; align-items:center; justify-content:center;
+    text-align:center; padding:10px 10px;
     font-family: var(--display); font-weight:800; font-size:11.5px;
-    letter-spacing:0.05em; text-transform:uppercase; color:#fff;
+    letter-spacing:0.03em; color:#fff; line-height:1.25;
   }
   .faq-card .content{
     flex:1; padding:11px 16px; display:flex; flex-direction:column;
-    justify-content:center; gap:7px; min-width:0;
+    justify-content:center; gap:8px; min-width:0;
   }
-  .faq-card.question .label{ background: linear-gradient(160deg, #5a3aa8, #3d2470); }
-  .faq-card.answer .label{ background: linear-gradient(160deg, #1e4a8c, #163a6e); }
-  .faq-card.example .label{ background: linear-gradient(160deg, #8a8f97, #6b7078); }
+  .faq-card.question{ border-left-color:#3f6fd6; }
+  .faq-card.question .label{ background: linear-gradient(160deg, #2f5cc4, #1f3f8f); }
+  .faq-card.topic{ border-left-color:#a3352f; }
+  .faq-card.topic .label{ background: linear-gradient(160deg, #8a2e28, #601e19); }
+  .faq-card.example{ border-left-color:#8a8f97; }
+  .faq-card.example .label{ background: linear-gradient(160deg, #7d828a, #5d6167); }
 
-  .faq-card .content p{ margin:0; color: var(--amber); font-size:13px; line-height:1.6; }
-  .faq-card.question .content p{ font-weight:600; }
-  .faq-card.example ul{ margin:0; padding-left:18px; color: var(--amber); font-size:12.5px; line-height:1.8; }
+  .content-row{ display:flex; gap:22px; flex-wrap:wrap; }
+  .content-row .col{ flex:1 1 220px; min-width: 200px; color: var(--amber); font-size:13px; line-height:1.65; }
+  .faq-card.question .content-row .col{ font-weight:600; }
 
   .faq-note{ color: var(--text-muted); font-size:12px; padding: 3px 14px; line-height:1.6; }
   .inline-link{ color:#7cc7ff; text-decoration:underline; word-break:break-all; }
@@ -405,73 +414,88 @@ async function fetchSheet(sheetName){
   return parseSheetsApiResponse(json);
 }
 
-/* ---------- Deteksi & parsing sheet bertipe FAQ (mis. BOLAA) ---------- */
+/* ---------- Deteksi & parsing sheet bertipe dokumen FAQ (mis. BOLAA) ---------- */
 function isFaqSheet(allRows){
   const count = allRows.filter(r => {
     const v = String(r[0] ?? "").trim().toLowerCase();
     return v.startsWith("pertanyaan") || v.startsWith("jawaban");
   }).length;
-  return count >= 2;
+  return count >= 1;
+}
+
+// Ubah "JAWABAN" / "TOTAL CORNERS" dsb (huruf besar semua) jadi rapi: "Jawaban" / "Total Corners"
+function prettyLabel(label){
+  if(label === label.toUpperCase()){
+    return label.toLowerCase().replace(/(^|\s|\/)\S/g, c => c.toUpperCase());
+  }
+  return label;
 }
 
 function buildFaqBlocks(allRows){
-  const blocks = [];
+  const rawBlocks = [];
   let current = null;
-  const pushCurrent = () => { if(current){ blocks.push(current); current = null; } };
+  let inPreamble = true; // area "LINK BOLA" di paling atas, sebelum topik pertama muncul
+  const pushCurrent = () => { if(current){ rawBlocks.push(current); current = null; } };
 
   allRows.forEach(row => {
     const label = String(row[0] ?? "").trim();
     const labelLower = label.toLowerCase();
     const restCells = row.slice(1).map(c => String(c ?? "").trim()).filter(v => v !== "");
-    const rowText = restCells.join(" · ");
 
-    // Judul bagian: sel tunggal, huruf besar semua, bukan label khusus
-    if(label && restCells.length === 0 && label === label.toUpperCase() && /[A-Z]/.test(label) && !/^(pertanyaan|jawaban|contoh)/i.test(label)){
+    // Judul section penuh (mis. "LINK BOLA"): sel label sendiri, tanpa konten di baris yang sama
+    if(label && restCells.length === 0 && label === label.toUpperCase() && /[A-Z]/.test(label)){
       pushCurrent();
-      blocks.push({ type: "title", text: label });
+      rawBlocks.push({ type: "title", text: label });
       return;
     }
 
-    if(labelLower.startsWith("pertanyaan")){
+    // Baris link (hanya di area atas, sebelum topik pertama): label + satu sel berisi URL murni
+    if(inPreamble && label && restCells.length === 1 && /^https?:\/\/\S+$/i.test(restCells[0])){
+      rawBlocks.push({ type: "link", label, url: restCells[0] });
+      return;
+    }
+
+    if(label){
+      // Baris berlabel baru = mulai kartu baru
       pushCurrent();
-      current = { type: "qa", question: rowText, answerLines: [] };
+      inPreamble = false;
+      const kind = labelLower.startsWith("pertanyaan") ? "question"
+                 : labelLower.startsWith("contoh") ? "example"
+                 : "topic"; // termasuk "JAWABAN" dan semua label topik lainnya
+      current = {
+        type: kind,
+        label: kind === "question" ? "Pertanyaan" : prettyLabel(label.replace(/:\s*$/, "")),
+        rows: restCells.length ? [restCells] : []
+      };
       return;
     }
 
-    if(labelLower.startsWith("jawaban")){
-      if(current && current.type === "qa"){
-        if(rowText) current.answerLines.push(rowText);
-      }else{
-        pushCurrent();
-        current = { type: "qa", question: "", answerLines: rowText ? [rowText] : [] };
-      }
+    // Baris lanjutan tanpa label -> tambahkan sebagai baris konten baru pada kartu yang terbuka
+    if(current && restCells.length){
+      current.rows.push(restCells);
       return;
     }
 
-    if(labelLower.startsWith("contoh")){
-      pushCurrent();
-      current = { type: "example", title: label, lines: rowText ? [rowText] : [] };
-      return;
-    }
-
-    const urlCell = row.find(c => /^https?:\/\//i.test(String(c ?? "").trim()));
-    if(label && urlCell && !current){
-      blocks.push({ type: "link", label, url: String(urlCell).trim() });
-      return;
-    }
-
-    if(current){
-      if(current.type === "qa" && rowText) current.answerLines.push(rowText);
-      else if(current.type === "example" && rowText) current.lines.push(rowText);
-      return;
-    }
-
-    if(rowText || label){
-      blocks.push({ type: "note", text: [label, rowText].filter(Boolean).join(" — ") });
+    // Fallback: baris berdiri sendiri tanpa kartu terbuka
+    if(restCells.length){
+      rawBlocks.push({ type: "note", text: restCells.join(" · ") });
     }
   });
   pushCurrent();
-  return blocks;
+
+  // Gabungkan baris-baris link berurutan jadi satu kartu putih (mis. LINK BOLA)
+  const merged = [];
+  let linkGroup = null;
+  rawBlocks.forEach(b => {
+    if(b.type === "link"){
+      if(!linkGroup){ linkGroup = { type: "linkGroup", items: [] }; merged.push(linkGroup); }
+      linkGroup.items.push({ label: b.label, url: b.url });
+    }else{
+      linkGroup = null;
+      merged.push(b);
+    }
+  });
+  return merged;
 }
 
 function linkify(escapedText){
@@ -482,40 +506,35 @@ function linkify(escapedText){
 
 function renderFaqBlocks(blocks, query){
   const q = (query || "").toLowerCase();
-  const matches = str => !q || String(str).toLowerCase().includes(q);
+  const rowsMatch = rows => !q || rows.some(cols => cols.some(c => c.toLowerCase().includes(q)));
 
   return blocks.map(b => {
     if(b.type === "title"){
-      if(!matches(b.text)) return "";
+      if(q && !b.text.toLowerCase().includes(q)) return "";
       return `<div class="faq-title">${escapeHtml(b.text)}</div>`;
     }
-    if(b.type === "link"){
-      if(!matches(b.label) && !matches(b.url)) return "";
-      return `<div class="faq-link-row">
-        <span class="faq-link-label">${escapeHtml(b.label)}</span>
-        <a href="${escapeHtml(b.url)}" target="_blank" rel="noopener noreferrer" class="faq-link">${escapeHtml(b.url)} ↗</a>
-      </div>`;
+
+    if(b.type === "linkGroup"){
+      const items = b.items.filter(it => !q || it.label.toLowerCase().includes(q) || it.url.toLowerCase().includes(q));
+      if(items.length === 0) return "";
+      return `<div class="faq-link-card">${items.map(it => `
+        <div class="faq-link-row">
+          <span class="faq-link-label">${escapeHtml(it.label)}</span>
+          <a href="${escapeHtml(it.url)}" target="_blank" rel="noopener noreferrer" class="faq-link">${escapeHtml(it.url)} ↗</a>
+        </div>`).join("")}</div>`;
     }
-    if(b.type === "qa"){
-      const hay = b.question + " " + b.answerLines.join(" ");
-      if(!matches(hay)) return "";
-      const qHtml = b.question
-        ? `<div class="faq-card question"><div class="label">Pertanyaan</div><div class="content"><p>${escapeHtml(b.question)}</p></div></div>`
-        : "";
-      const aLines = b.answerLines.length ? b.answerLines : ["-"];
-      const aHtml = `<div class="faq-card answer"><div class="label">Jawaban</div><div class="content">${aLines.map(l => `<p>${linkify(escapeHtml(l))}</p>`).join("")}</div></div>`;
-      return qHtml + aHtml;
-    }
-    if(b.type === "example"){
-      const hay = b.lines.join(" ");
-      if(!matches(hay)) return "";
-      return `<div class="faq-card example"><div class="label">${escapeHtml(b.title || "Contoh")}</div><div class="content"><ul>${b.lines.map(l => `<li>${linkify(escapeHtml(l))}</li>`).join("")}</ul></div></div>`;
-    }
+
     if(b.type === "note"){
-      if(!matches(b.text)) return "";
+      if(q && !b.text.toLowerCase().includes(q)) return "";
       return `<div class="faq-note">${linkify(escapeHtml(b.text))}</div>`;
     }
-    return "";
+
+    // question / topic (termasuk jawaban) / example -> kartu label + konten (mendukung kolom ganda)
+    if(!rowsMatch(b.rows)) return "";
+    const contentHtml = b.rows.length
+      ? b.rows.map(cols => `<div class="content-row">${cols.map(c => `<div class="col">${linkify(escapeHtml(c))}</div>`).join("")}</div>`).join("")
+      : `<div class="content-row"><div class="col">-</div></div>`;
+    return `<div class="faq-card ${b.type}"><div class="label">${escapeHtml(b.label)}</div><div class="content">${contentHtml}</div></div>`;
   }).join("");
 }
 
@@ -539,7 +558,7 @@ function renderStats(){
     const sState = state[name];
     const isFaq = sState?.isFaq;
     const value = isFaq
-      ? (sState.faqBlocks.filter(b => b.type === "qa").length)
+      ? (sState.faqBlocks.filter(b => b.type === "question").length)
       : (sState?.rows?.length ?? 0);
     cards.push({
       label: name,
@@ -568,7 +587,7 @@ function buildTabs(){
     tab.dataset.sheet = name;
     const s = state[name];
     const count = s?.isFaq
-      ? (s.faqBlocks?.filter(b => b.type === "qa").length ?? "–")
+      ? (s.faqBlocks?.filter(b => b.type === "question").length ?? "–")
       : (s?.rows?.length ?? "–");
     tab.innerHTML = `<span class="dot"></span>${name}<span class="count">${count}</span>`;
     tab.addEventListener("click", () => switchTab(name));
@@ -615,7 +634,7 @@ function renderTable(name){
 
   if(s.isFaq){
     const html = renderFaqBlocks(s.faqBlocks, s.query);
-    const totalQa = s.faqBlocks.filter(b => b.type === "qa").length;
+    const totalQa = s.faqBlocks.filter(b => b.type === "question").length;
     infoEl.textContent = `${totalQa} pertanyaan`;
     scrollEl.innerHTML = html.trim()
       ? `<div class="faq-container">${html}</div>`
