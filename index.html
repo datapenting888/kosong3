@@ -342,6 +342,8 @@ const API_KEY = "AIzaSyBRNBQxfptX2-BF1gJ3eqVNMFi8ne63Qv0";
 const SHEETS = ["RESULT", "DATA PENTING", "BOLAA"];
 // Sheet yang tampilannya berupa blok topik (label + paragraf), dirender seperti BOLAA
 const DOCUMENT_SHEETS = new Set(["DATA PENTING", "BOLAA"]);
+// Sheet yang datanya dibatasi hanya kolom tertentu (mis. RESULT cuma kolom A-C)
+const SHEET_RANGES = { "RESULT": "A1:C" };
 const AUTO_REFRESH_MINUTES = 5;
 /* =========================================================== */
 
@@ -350,7 +352,8 @@ let activeSheet = SHEETS[0];
 
 function sheetsApiUrl(sheetName){
   // Nama sheet saja (tanpa batas range) = ambil seluruh baris & kolom yang terisi di sheet tsb
-  return `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(sheetName)}?valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=FORMATTED_STRING&key=${API_KEY}`;
+  const range = SHEET_RANGES[sheetName] ? `${encodeURIComponent(sheetName)}!${SHEET_RANGES[sheetName]}` : encodeURIComponent(sheetName);
+  return `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=FORMATTED_STRING&key=${API_KEY}`;
 }
 
 /* ---------- Parsing respons Google Sheets API v4 ---------- */
