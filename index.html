@@ -283,6 +283,14 @@
   .content-row .col{ flex:1 1 220px; min-width: 200px; color: var(--amber); font-size:13px; line-height:1.65; }
   .faq-card.question .content-row .col{ font-weight:600; }
 
+  /* Baris polos (mis. sheet RESULT) — tanpa kotak label nomor, mendekati tampilan spreadsheet asli */
+  .plain-row{
+    display:flex; align-items:center; flex-wrap:wrap; gap:22px;
+    padding:11px 16px; background:#0a0d11;
+  }
+  .plain-row.today-row{ background:#132420; }
+  .plain-row .col{ flex:1 1 220px; min-width: 200px; color: var(--amber); font-size:13px; line-height:1.65; }
+
   .faq-note{ color: var(--text-muted); font-size:12px; padding: 3px 14px; line-height:1.6; }
   .inline-link{ color:#7cc7ff; text-decoration:underline; word-break:break-all; }
   .inline-link:hover{ color: var(--teal); }
@@ -597,7 +605,7 @@ function renderTable(name){
     const filledCells = row.map(cell => String(cell ?? "").trim()).filter(v => v !== "");
     if(filledCells.length === 0) return ""; // baris kosong sepenuhnya -> lewati, jangan tampilkan kartu kosong
     const cols = filledCells.map(val => `<div class="col">${linkify(formatCell(val))}</div>`).join("");
-    return `<div class="faq-card example${isToday ? ' today-row' : ''}"><div class="label">#${ri + 1}</div><div class="content"><div class="content-row">${cols}</div></div></div>`;
+    return `<div class="plain-row${isToday ? ' today-row' : ''}">${cols}</div>`;
   }).filter(html => html !== "").join("");
 
   scrollEl.innerHTML = cardsHtml
