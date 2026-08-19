@@ -264,6 +264,7 @@
     text-align:center; padding:10px 10px;
     font-family: var(--display); font-weight:800; font-size:11.5px;
     letter-spacing:0.03em; color:#fff; line-height:1.25;
+    word-break:break-word;
   }
   .faq-card .content{
     flex:1; padding:11px 16px; display:flex; flex-direction:column;
@@ -331,6 +332,8 @@
 const SPREADSHEET_ID = "1KlWD9pye4vqIsxO6sv5XfyfO-e4CCSS6tcKqiP1DjY0";
 const API_KEY = "AIzaSyBRNBQxfptX2-BF1gJ3eqVNMFi8ne63Qv0";
 const SHEETS = ["RESULT", "DATA PENTING", "BOLAA"];
+// Sheet yang tampilannya berupa blok topik (label + paragraf), dirender seperti BOLAA
+const DOCUMENT_SHEETS = new Set(["DATA PENTING", "BOLAA"]);
 const AUTO_REFRESH_MINUTES = 5;
 /* =========================================================== */
 
@@ -377,27 +380,9 @@ async function fetchSheet(sheetName){
   return parseSheetsApiResponse(json);
 }
 
-/* ---------- Deteksi & parsing sheet bertipe dokumen (blok topik, mis. BOLAA & DATA PENTING) ---------- */
-function isFaqSheet(allRows){
-  // Sheet FAQ klasik: ada baris berlabel "Pertanyaan" / "Jawaban"
-  const qaCount = allRows.filter(r => {
-    const v = String(r[0] ?? "").trim().toLowerCase();
-    return v.startsWith("pertanyaan") || v.startsWith("jawaban");
-  }).length;
-  if(qaCount >= 1) return true;
-
-  // Sheet dokumen umum (mis. DATA PENTING): judul topik ALL CAPS berdiri sendiri,
-  // dan/atau banyak baris lanjutan (kolom A kosong tapi kolom lain ada isi) —
-  // ciri khas paragraf panjang di bawah satu label topik, bukan tabel data biasa.
-  let titleRows = 0;
-  let continuationRows = 0;
-  allRows.forEach(r => {
-    const first = String(r[0] ?? "").trim();
-    const restHasContent = r.slice(1).some(c => String(c ?? "").trim() !== "");
-    if(first === "" && restHasContent) continuationRows++;
-    if(first !== "" && first === first.toUpperCase() && /[A-Z]/.test(first) && !restHasContent) titleRows++;
-  });
-  return titleRows >= 2 || continuationRows >= 5;
+/* ---------- Deteksi sheet bertipe dokumen (blok topik, mis. BOLAA & DATA PENTING) ---------- */
+function isFaqSheet(sheetName){
+  return DOCUMENT_SHEETS.has(sheetName);
 }
 
 // Ubah "JAWABAN" / "TOTAL CORNERS" dsb (huruf besar semua) jadi rapi: "Jawaban" / "Total Corners"
@@ -415,9 +400,17 @@ function buildFaqBlocks(allRows){
   const pushCurrent = () => { if(current){ rawBlocks.push(current); current = null; } };
 
   allRows.forEach(row => {
-    const label = String(row[0] ?? "").trim();
+    // Pakai sel pertama yang benar-benar berisi teks sebagai kandidat "label" —
+    // supaya kolom-kolom kosong di depan/tengah tidak ikut dianggap sebagai konten.
+    const nonEmpty = row
+      .map((c, i) => ({ i, v: String(c ?? "").trim() }))
+      .filter(o => o.v !== "");
+    if(nonEmpty.length === 0) return; // baris benar-benar kosong -> lewati
+
+    const isLabelCol = nonEmpty[0].i === 0;
+    const label = isLabelCol ? nonEmpty[0].v : "";
     const labelLower = label.toLowerCase();
-    const restCells = row.slice(1).map(c => String(c ?? "").trim()).filter(v => v !== "");
+    const restCells = isLabelCol ? nonEmpty.slice(1).map(o => o.v) : nonEmpty.map(o => o.v);
 
     // Judul section penuh (mis. "LINK BOLA"): sel label sendiri, tanpa konten di baris yang sama
     if(label && restCells.length === 0 && label === label.toUpperCase() && /[A-Z]/.test(label)){
@@ -510,8 +503,8 @@ function renderFaqBlocks(blocks, query){
     if(!rowsMatch(b.rows)) return "";
     const contentHtml = b.rows.length
       ? b.rows.map(cols => `<div class="content-row">${cols.map(c => `<div class="col">${linkify(escapeHtml(c))}</div>`).join("")}</div>`).join("")
-      : `<div class="content-row"><div class="col">-</div></div>`;
-    return `<div class="faq-card ${b.type}"><div class="label">${escapeHtml(b.label)}</div><div class="content">${contentHtml}</div></div>`;
+      : "";
+    return `<div class="faq-card ${b.type}"><div class="label">${linkify(escapeHtml(b.label))}</div>${contentHtml ? `<div class="content">${contentHtml}</div>` : ""}</div>`;
   }).join("");
 }
 
@@ -601,15 +594,15 @@ function renderTable(name){
       const cellVal = String(row[dateColIdx] ?? "");
       if(cellVal.includes(todayStr) || cellVal === todayStr) isToday = true;
     }
-    const cols = row.map(cell => {
-      const val = String(cell ?? "").trim();
-      const display = val === "" ? "-" : linkify(formatCell(cell));
-      return `<div class="col">${display}</div>`;
-    }).join("");
+    const filledCells = row.map(cell => String(cell ?? "").trim()).filter(v => v !== "");
+    if(filledCells.length === 0) return ""; // baris kosong sepenuhnya -> lewati, jangan tampilkan kartu kosong
+    const cols = filledCells.map(val => `<div class="col">${linkify(formatCell(val))}</div>`).join("");
     return `<div class="faq-card example${isToday ? ' today-row' : ''}"><div class="label">#${ri + 1}</div><div class="content"><div class="content-row">${cols}</div></div></div>`;
-  }).join("");
+  }).filter(html => html !== "").join("");
 
-  scrollEl.innerHTML = `<div class="faq-container">${cardsHtml}</div>`;
+  scrollEl.innerHTML = cardsHtml
+    ? `<div class="faq-container">${cardsHtml}</div>`
+    : `<div class="state">Tidak ada data yang cocok</div>`;
 }
 
 function formatCell(val){
@@ -694,7 +687,7 @@ async function loadAll(){
   await Promise.all(SHEETS.map(async name => {
     try{
       const { headers, rows, allRows } = await fetchSheet(name);
-      if(isFaqSheet(allRows)){
+      if(isFaqSheet(name)){
         state[name] = { isFaq: true, faqBlocks: buildFaqBlocks(allRows), rows: allRows, query: "" };
       }else{
         state[name] = { isFaq: false, headers, rows, filtered: rows.slice(), sortCol: null, sortDir: 1, query: "" };
