@@ -557,13 +557,12 @@ function renderStats(){
   SHEETS.forEach((name, i) => {
     const sState = state[name];
     const isFaq = sState?.isFaq;
-    const value = isFaq
-      ? (sState.faqBlocks.filter(b => b.type === "question").length)
-      : (sState?.rows?.length ?? 0);
+    if(isFaq) return; // kartu untuk sheet FAQ (mis. BOLAA) tidak ditampilkan di stats-row
+    const value = sState?.rows?.length ?? 0;
     cards.push({
       label: name,
       value: value.toLocaleString('id-ID'),
-      sub: sState?.error ? "Gagal dimuat" : (isFaq ? "pertanyaan" : "baris data"),
+      sub: sState?.error ? "Gagal dimuat" : "baris data",
       accent: accents[(i+1) % accents.length]
     });
   });
