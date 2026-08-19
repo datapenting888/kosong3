@@ -377,13 +377,27 @@ async function fetchSheet(sheetName){
   return parseSheetsApiResponse(json);
 }
 
-/* ---------- Deteksi & parsing sheet bertipe dokumen FAQ (mis. BOLAA) ---------- */
+/* ---------- Deteksi & parsing sheet bertipe dokumen (blok topik, mis. BOLAA & DATA PENTING) ---------- */
 function isFaqSheet(allRows){
-  const count = allRows.filter(r => {
+  // Sheet FAQ klasik: ada baris berlabel "Pertanyaan" / "Jawaban"
+  const qaCount = allRows.filter(r => {
     const v = String(r[0] ?? "").trim().toLowerCase();
     return v.startsWith("pertanyaan") || v.startsWith("jawaban");
   }).length;
-  return count >= 1;
+  if(qaCount >= 1) return true;
+
+  // Sheet dokumen umum (mis. DATA PENTING): judul topik ALL CAPS berdiri sendiri,
+  // dan/atau banyak baris lanjutan (kolom A kosong tapi kolom lain ada isi) —
+  // ciri khas paragraf panjang di bawah satu label topik, bukan tabel data biasa.
+  let titleRows = 0;
+  let continuationRows = 0;
+  allRows.forEach(r => {
+    const first = String(r[0] ?? "").trim();
+    const restHasContent = r.slice(1).some(c => String(c ?? "").trim() !== "");
+    if(first === "" && restHasContent) continuationRows++;
+    if(first !== "" && first === first.toUpperCase() && /[A-Z]/.test(first) && !restHasContent) titleRows++;
+  });
+  return titleRows >= 2 || continuationRows >= 5;
 }
 
 // Ubah "JAWABAN" / "TOTAL CORNERS" dsb (huruf besar semua) jadi rapi: "Jawaban" / "Total Corners"
