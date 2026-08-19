@@ -261,6 +261,58 @@
     text-align:center; font-family: var(--mono);
   }
 
+  /* ---------- FAQ / Q&A view (mis. sheet BOLAA) ---------- */
+  .faq-container{ display:flex; flex-direction:column; gap:12px; padding: 16px; }
+  .faq-title{
+    background: linear-gradient(135deg, #2f8f5e, #1c5c3c);
+    color:#f2fff7; font-family: var(--display); font-weight:800; font-size:13.5px;
+    letter-spacing:0.05em; text-transform:uppercase; text-align:center;
+    padding: 11px 16px; border-radius:8px;
+    box-shadow: 0 3px 10px rgba(47,143,94,0.18);
+  }
+  .faq-link-row{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    background: var(--surface-2); border:1px solid var(--border); border-radius:9px;
+    padding:11px 16px; flex-wrap:wrap;
+  }
+  .faq-link-label{ font-weight:700; color:#5fd88a; font-size:13px; font-family: var(--sans); white-space:nowrap; }
+  .faq-link{
+    color: var(--teal); font-family: var(--mono); font-size:12.5px; text-decoration:none;
+    word-break:break-all; display:inline-flex; align-items:center; gap:5px;
+  }
+  .faq-link:hover{ text-decoration:underline; }
+
+  .faq-qa{ border-radius:10px; overflow:hidden; border:1px solid var(--border); }
+  .faq-question{
+    background: linear-gradient(135deg, #4a2f78, #33204f);
+    color:#ecdcff; font-weight:700; font-size:13px; padding:11px 16px;
+    display:flex; gap:8px; align-items:baseline;
+  }
+  .faq-question .tag{
+    font-family: var(--display); font-size:10px; font-weight:800;
+    text-transform:uppercase; letter-spacing:0.06em; color:#c9a7ff;
+    background: rgba(255,255,255,0.08); padding:2px 7px; border-radius:5px;
+    flex-shrink:0;
+  }
+  .faq-answer{
+    background: linear-gradient(160deg, #1c3454, #16273e);
+    padding: 13px 16px; color: var(--amber); font-size:13px; line-height:1.65;
+  }
+  .faq-answer p{ margin:0 0 9px; }
+  .faq-answer p:last-child{ margin-bottom:0; }
+
+  .faq-example{
+    background: #383e46; border-radius:10px; padding:13px 16px; border:1px solid var(--border);
+  }
+  .faq-example-title{
+    font-weight:800; color:#d8dce1; font-size:11.5px; text-transform:uppercase;
+    letter-spacing:0.07em; margin-bottom:9px;
+  }
+  .faq-example ul{ margin:0; padding-left:18px; color: var(--amber); font-size:12.5px; line-height:1.8; }
+
+  .faq-note{ color: var(--text-muted); font-size:12.5px; padding: 2px 4px; line-height:1.6; }
+  .inline-link{ color: var(--teal); text-decoration:underline; word-break:break-all; }
+
   @media (max-width: 640px){
     .clock-wrap{ display:none; }
     .tabs{ overflow-x:auto; }
@@ -321,7 +373,7 @@ function sheetsApiUrl(sheetName){
 /* ---------- Parsing respons Google Sheets API v4 ---------- */
 function parseSheetsApiResponse(json){
   const values = json.values || [];
-  if(values.length === 0) return { headers: [], rows: [] };
+  if(values.length === 0) return { headers: [], rows: [], allRows: [] };
 
   const headerRow = values[0];
   const bodyRows = values.slice(1);
@@ -336,7 +388,7 @@ function parseSheetsApiResponse(json){
     return padded;
   });
 
-  return { headers, rows };
+  return { headers, rows, allRows: values };
 }
 
 async function fetchSheet(sheetName){
@@ -351,6 +403,122 @@ async function fetchSheet(sheetName){
   }
   const json = await res.json();
   return parseSheetsApiResponse(json);
+}
+
+/* ---------- Deteksi & parsing sheet bertipe FAQ (mis. BOLAA) ---------- */
+function isFaqSheet(allRows){
+  const count = allRows.filter(r => {
+    const v = String(r[0] ?? "").trim().toLowerCase();
+    return v.startsWith("pertanyaan") || v.startsWith("jawaban");
+  }).length;
+  return count >= 2;
+}
+
+function buildFaqBlocks(allRows){
+  const blocks = [];
+  let current = null;
+  const pushCurrent = () => { if(current){ blocks.push(current); current = null; } };
+
+  allRows.forEach(row => {
+    const label = String(row[0] ?? "").trim();
+    const labelLower = label.toLowerCase();
+    const restCells = row.slice(1).map(c => String(c ?? "").trim()).filter(v => v !== "");
+    const rowText = restCells.join(" · ");
+
+    // Judul bagian: sel tunggal, huruf besar semua, bukan label khusus
+    if(label && restCells.length === 0 && label === label.toUpperCase() && /[A-Z]/.test(label) && !/^(pertanyaan|jawaban|contoh)/i.test(label)){
+      pushCurrent();
+      blocks.push({ type: "title", text: label });
+      return;
+    }
+
+    if(labelLower.startsWith("pertanyaan")){
+      pushCurrent();
+      current = { type: "qa", question: rowText, answerLines: [] };
+      return;
+    }
+
+    if(labelLower.startsWith("jawaban")){
+      if(current && current.type === "qa"){
+        if(rowText) current.answerLines.push(rowText);
+      }else{
+        pushCurrent();
+        current = { type: "qa", question: "", answerLines: rowText ? [rowText] : [] };
+      }
+      return;
+    }
+
+    if(labelLower.startsWith("contoh")){
+      pushCurrent();
+      current = { type: "example", title: label, lines: rowText ? [rowText] : [] };
+      return;
+    }
+
+    const urlCell = row.find(c => /^https?:\/\//i.test(String(c ?? "").trim()));
+    if(label && urlCell && !current){
+      blocks.push({ type: "link", label, url: String(urlCell).trim() });
+      return;
+    }
+
+    if(current){
+      if(current.type === "qa" && rowText) current.answerLines.push(rowText);
+      else if(current.type === "example" && rowText) current.lines.push(rowText);
+      return;
+    }
+
+    if(rowText || label){
+      blocks.push({ type: "note", text: [label, rowText].filter(Boolean).join(" — ") });
+    }
+  });
+  pushCurrent();
+  return blocks;
+}
+
+function linkify(escapedText){
+  return escapedText.replace(/(https?:\/\/[^\s<]+)/g, url =>
+    `<a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-link">${url}</a>`
+  );
+}
+
+function renderFaqBlocks(blocks, query){
+  const q = (query || "").toLowerCase();
+  const matches = str => !q || String(str).toLowerCase().includes(q);
+
+  return blocks.map(b => {
+    if(b.type === "title"){
+      if(!matches(b.text)) return "";
+      return `<div class="faq-title">${escapeHtml(b.text)}</div>`;
+    }
+    if(b.type === "link"){
+      if(!matches(b.label) && !matches(b.url)) return "";
+      return `<div class="faq-link-row">
+        <span class="faq-link-label">${escapeHtml(b.label)}</span>
+        <a href="${escapeHtml(b.url)}" target="_blank" rel="noopener noreferrer" class="faq-link">${escapeHtml(b.url)} ↗</a>
+      </div>`;
+    }
+    if(b.type === "qa"){
+      const hay = b.question + " " + b.answerLines.join(" ");
+      if(!matches(hay)) return "";
+      const answerHtml = b.answerLines.map(l => `<p>${linkify(escapeHtml(l))}</p>`).join("");
+      return `<div class="faq-qa">
+        ${b.question ? `<div class="faq-question"><span class="tag">Tanya</span>${escapeHtml(b.question)}</div>` : ""}
+        <div class="faq-answer">${answerHtml || '<p>-</p>'}</div>
+      </div>`;
+    }
+    if(b.type === "example"){
+      const hay = b.lines.join(" ");
+      if(!matches(hay)) return "";
+      return `<div class="faq-example">
+        <div class="faq-example-title">${escapeHtml(b.title)}</div>
+        <ul>${b.lines.map(l => `<li>${linkify(escapeHtml(l))}</li>`).join("")}</ul>
+      </div>`;
+    }
+    if(b.type === "note"){
+      if(!matches(b.text)) return "";
+      return `<div class="faq-note">${linkify(escapeHtml(b.text))}</div>`;
+    }
+    return "";
+  }).join("");
 }
 
 /* ---------- UI: kartu statistik ---------- */
@@ -370,10 +538,15 @@ function renderStats(){
     { label: "Total Baris", value: totalRows.toLocaleString('id-ID'), sub: `dari ${SHEETS.length} sheet`, accent: accents[0] },
   ];
   SHEETS.forEach((name, i) => {
+    const sState = state[name];
+    const isFaq = sState?.isFaq;
+    const value = isFaq
+      ? (sState.faqBlocks.filter(b => b.type === "qa").length)
+      : (sState?.rows?.length ?? 0);
     cards.push({
       label: name,
-      value: (state[name]?.rows?.length ?? 0).toLocaleString('id-ID'),
-      sub: state[name]?.error ? "Gagal dimuat" : "baris data",
+      value: value.toLocaleString('id-ID'),
+      sub: sState?.error ? "Gagal dimuat" : (isFaq ? "pertanyaan" : "baris data"),
       accent: accents[(i+1) % accents.length]
     });
   });
@@ -395,7 +568,10 @@ function buildTabs(){
     const tab = document.createElement("div");
     tab.className = "tab" + (name === activeSheet ? " active" : "");
     tab.dataset.sheet = name;
-    const count = state[name]?.rows?.length ?? "–";
+    const s = state[name];
+    const count = s?.isFaq
+      ? (s.faqBlocks?.filter(b => b.type === "qa").length ?? "–")
+      : (s?.rows?.length ?? "–");
     tab.innerHTML = `<span class="dot"></span>${name}<span class="count">${count}</span>`;
     tab.addEventListener("click", () => switchTab(name));
     tabsEl.appendChild(tab);
@@ -434,7 +610,22 @@ function renderTable(name){
   const s = state[name];
   const scrollEl = document.querySelector(`[data-scroll="${CSS.escape(name)}"]`);
   const infoEl = document.querySelector(`[data-info="${CSS.escape(name)}"]`);
-  if(!s || !s.headers){
+  if(!s){
+    scrollEl.innerHTML = `<div class="state error">Data tidak tersedia</div>`;
+    return;
+  }
+
+  if(s.isFaq){
+    const html = renderFaqBlocks(s.faqBlocks, s.query);
+    const totalQa = s.faqBlocks.filter(b => b.type === "qa").length;
+    infoEl.textContent = `${totalQa} pertanyaan`;
+    scrollEl.innerHTML = html.trim()
+      ? `<div class="faq-container">${html}</div>`
+      : `<div class="state">Tidak ada yang cocok</div>`;
+    return;
+  }
+
+  if(!s.headers){
     scrollEl.innerHTML = `<div class="state error">Data tidak tersedia</div>`;
     return;
   }
@@ -517,11 +708,14 @@ function attachSearch(name){
   input.addEventListener("input", () => {
     const q = input.value.trim().toLowerCase();
     const s = state[name];
+    if(!s) return;
     s.query = q;
-    s.filtered = q === ""
-      ? s.rows.slice()
-      : s.rows.filter(row => row.some(cell => String(cell ?? "").toLowerCase().includes(q)));
-    if(s.sortCol !== null){ s.filtered.sort((a,b) => compareVals(a[s.sortCol], b[s.sortCol]) * s.sortDir); }
+    if(!s.isFaq){
+      s.filtered = q === ""
+        ? s.rows.slice()
+        : s.rows.filter(row => row.some(cell => String(cell ?? "").toLowerCase().includes(q)));
+      if(s.sortCol !== null){ s.filtered.sort((a,b) => compareVals(a[s.sortCol], b[s.sortCol]) * s.sortDir); }
+    }
     renderTable(name);
   });
 }
@@ -556,8 +750,12 @@ async function loadAll(){
 
   await Promise.all(SHEETS.map(async name => {
     try{
-      const { headers, rows } = await fetchSheet(name);
-      state[name] = { headers, rows, filtered: rows.slice(), sortCol: null, sortDir: 1, query: "" };
+      const { headers, rows, allRows } = await fetchSheet(name);
+      if(isFaqSheet(allRows)){
+        state[name] = { isFaq: true, faqBlocks: buildFaqBlocks(allRows), rows: allRows, query: "" };
+      }else{
+        state[name] = { isFaq: false, headers, rows, filtered: rows.slice(), sortCol: null, sortDir: 1, query: "" };
+      }
     }catch(err){
       console.error(`Gagal memuat sheet ${name}:`, err);
       state[name] = { headers:null, rows:[], filtered:[], error: err.message };
@@ -570,7 +768,7 @@ async function loadAll(){
 
   buildTabs();
   renderStats();
-  SHEETS.forEach(name => { if(state[name].headers) renderTable(name); });
+  SHEETS.forEach(name => { if(state[name].isFaq || state[name].headers) renderTable(name); });
   renderFlapClock();
   btn.classList.remove("spinning");
 }
