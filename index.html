@@ -284,12 +284,19 @@
   .faq-card.question .content-row .col{ font-weight:600; }
 
   /* Baris polos (mis. sheet RESULT) — tanpa kotak label nomor, mendekati tampilan spreadsheet asli */
+  /* Baris yang berdempetan (tanpa baris kosong di antaranya) digabung dalam 1 .plain-block, */
+  /* tanpa garis pemisah di antara baris2 di dalamnya — supaya tetap terasa 1 kesatuan / 1 kata. */
+  .plain-block{ background:#0a0d11; }
+  .faq-container > .plain-block{ border-bottom: 3px solid #1d4857; }
+  .faq-container > .plain-block:last-child{ border-bottom: none; }
   .plain-row{
     display:flex; align-items:center; flex-wrap:wrap; gap:22px;
-    padding:11px 16px; background:#0a0d11;
+    padding:11px 16px;
   }
   .plain-row.today-row{ background:#132420; }
   .plain-row .col{ flex:1 1 220px; min-width: 200px; color: var(--amber); font-size:13px; line-height:1.65; }
+  /* Baris kosong pada spreadsheet asli -> ditampilkan sebagai jarak kosong, tanpa garis pemisah */
+  .faq-container > .plain-spacer{ border-bottom: none; height: 30px; }
 
   .faq-note{ color: var(--text-muted); font-size:12px; padding: 3px 14px; line-height:1.6; }
   .inline-link{ color:#7cc7ff; text-decoration:underline; word-break:break-all; }
@@ -343,7 +350,7 @@ const SHEETS = ["RESULT", "DATA PENTING", "BOLAA"];
 // Sheet yang tampilannya berupa blok topik (label + paragraf), dirender seperti BOLAA
 const DOCUMENT_SHEETS = new Set(["DATA PENTING", "BOLAA"]);
 // Sheet yang datanya dibatasi hanya kolom tertentu (mis. RESULT cuma kolom A-C)
-const SHEET_RANGES = { "RESULT": "A8:C" };
+const SHEET_RANGES = { "RESULT": "A1:C" };
 const AUTO_REFRESH_MINUTES = 5;
 /* =========================================================== */
 
@@ -599,17 +606,40 @@ function renderTable(name){
   const todayStr = new Date().toLocaleDateString('id-ID', { day:'2-digit', month:'2-digit', year:'numeric' }).replace(/\//g,'-');
   const dateColIdx = s.headers.findIndex(h => /tanggal|date|tgl/i.test(h));
 
-  const cardsHtml = rows.map((row, ri) => {
+  // Baris yang berdempetan (tanpa baris kosong di antaranya) digabung jadi 1 blok tanpa garis pemisah,
+  // baris kosong di spreadsheet asli ditampilkan sebagai jarak kosong (bukan dihilangkan).
+  const blocks = [];
+  let currentGroup = [];
+  const flushGroup = () => {
+    if(currentGroup.length === 0) return;
+    const rowsHtml = currentGroup.map(({ filledCells, isToday }) => {
+      const cols = filledCells.map(val => `<div class="col">${linkify(formatCell(val))}</div>`).join("");
+      return `<div class="plain-row${isToday ? ' today-row' : ''}">${cols}</div>`;
+    }).join("");
+    blocks.push(`<div class="plain-block">${rowsHtml}</div>`);
+    currentGroup = [];
+  };
+
+  rows.forEach(row => {
     let isToday = false;
     if(dateColIdx >= 0){
       const cellVal = String(row[dateColIdx] ?? "");
       if(cellVal.includes(todayStr) || cellVal === todayStr) isToday = true;
     }
     const filledCells = row.map(cell => String(cell ?? "").trim()).filter(v => v !== "");
-    if(filledCells.length === 0) return ""; // baris kosong sepenuhnya -> lewati, jangan tampilkan kartu kosong
-    const cols = filledCells.map(val => `<div class="col">${linkify(formatCell(val))}</div>`).join("");
-    return `<div class="plain-row${isToday ? ' today-row' : ''}">${cols}</div>`;
-  }).filter(html => html !== "").join("");
+    if(filledCells.length === 0){
+      flushGroup();
+      blocks.push(`<div class="plain-spacer"></div>`);
+    } else {
+      currentGroup.push({ filledCells, isToday });
+    }
+  });
+  flushGroup();
+  // Hindari spacer kosong berturut-turut di paling awal/akhir jadi terlihat aneh
+  while(blocks.length && blocks[0].includes('plain-spacer')) blocks.shift();
+  while(blocks.length && blocks[blocks.length - 1].includes('plain-spacer')) blocks.pop();
+
+  const cardsHtml = blocks.join("");
 
   scrollEl.innerHTML = cardsHtml
     ? `<div class="faq-container">${cardsHtml}</div>`
