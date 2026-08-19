@@ -261,18 +261,18 @@
   /* Baris polos (mis. sheet RESULT) — tanpa kotak label nomor, mendekati tampilan spreadsheet asli */
   /* Baris yang berdempetan (tanpa baris kosong di antaranya) digabung dalam 1 .plain-block, */
   /* tanpa garis pemisah di antara baris2 di dalamnya — supaya tetap terasa 1 kesatuan / 1 kata. */
-  .plain-block{ background:#0a0d11; padding: 11px 0; }
+  .plain-block{ background:#0a0d11; padding: 8px 0; }
   .faq-container > .plain-block{ border-bottom: 3px solid #1d4857; }
   .faq-container > .plain-block:last-child{ border-bottom: none; }
   .plain-block:has(.plain-row.today-row){ background:#132420; }
   .plain-row{
     display:flex; align-items:center; flex-wrap:wrap; gap:22px;
-    padding:2px 16px;
+    padding:0 16px;
   }
   .plain-row.today-row{ background:#132420; }
-  .plain-row .col{ flex:1 1 220px; min-width: 200px; color: var(--amber); font-size:13px; line-height:1.5; }
+  .plain-row .col{ flex:1 1 220px; min-width: 200px; color: var(--amber); font-size:13px; line-height:1.45; }
   /* Baris kosong pada spreadsheet asli -> ditampilkan sebagai jarak kosong, tanpa garis pemisah */
-  .faq-container > .plain-spacer{ border-bottom: none; height: 30px; }
+  .faq-container > .plain-spacer{ border-bottom: none; height: 18px; }
 
   .faq-note{ color: var(--text-muted); font-size:12px; padding: 3px 14px; line-height:1.6; }
   .inline-link{ color:#7cc7ff; text-decoration:underline; word-break:break-all; }
