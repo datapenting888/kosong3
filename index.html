@@ -107,46 +107,6 @@
   /* ---------- Layout ---------- */
   .wrap{ max-width: 1180px; margin: 0 auto; padding: 26px 20px 60px; }
 
-  /* ---------- Stat cards ---------- */
-  .stats-row{
-    display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-    margin-bottom: 24px;
-  }
-  .stat-card{
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 14px 16px;
-    display:flex; flex-direction:column; gap: 6px;
-    position: relative; overflow:hidden;
-  }
-  .stat-card::before{
-    content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
-    background: var(--stat-accent, var(--amber));
-  }
-  .stat-label{
-    font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em;
-    color: var(--text-dim); font-family: var(--sans); font-weight:600;
-    display:flex; align-items:center; gap:6px;
-  }
-  .stat-value{
-    font-family: var(--display); font-weight: 800; font-size: 22px;
-    color: var(--text); line-height:1;
-  }
-  .stat-sub{ font-size: 11px; color: var(--text-dim); font-family: var(--mono); }
-  .live-dot{
-    width:7px; height:7px; border-radius:50%; background: var(--teal);
-    box-shadow: 0 0 0 0 rgba(61,219,196,0.6);
-    animation: pulse 1.8s infinite;
-    display:inline-block;
-  }
-  @keyframes pulse{
-    0%{ box-shadow: 0 0 0 0 rgba(61,219,196,0.5); }
-    70%{ box-shadow: 0 0 0 7px rgba(61,219,196,0); }
-    100%{ box-shadow: 0 0 0 0 rgba(61,219,196,0); }
-  }
-  @media (max-width: 760px){
-    .stats-row{ grid-template-columns: repeat(2, 1fr); }
-  }
-
   .tabs{
     display:flex; gap: 6px; margin-bottom: 20px;
     border-bottom: 1px solid var(--border);
@@ -263,9 +223,11 @@
 
   /* ---------- FAQ / dokumen view (mis. sheet BOLAA) — meniru layout spreadsheet asli ---------- */
   .faq-container{
-    display:flex; flex-direction:column; gap:6px; padding: 14px;
+    display:flex; flex-direction:column; gap:0; padding: 14px;
     background: #05070a; border-radius: 8px;
   }
+  .faq-container > *{ border-bottom: 3px solid #1d4857; }
+  .faq-container > *:last-child{ border-bottom: none; }
   .faq-title{
     color:#4fe0c4; font-family: var(--display); font-weight:800; font-size:14px;
     letter-spacing:0.06em; text-transform:uppercase; text-align:center;
@@ -356,7 +318,6 @@
 </div>
 
 <div class="wrap">
-  <div class="stats-row" id="stats-row"></div>
   <div class="tabs" id="tabs"></div>
   <div id="panels"></div>
   <div class="footer-note">Data diambil langsung dari Google Sheets · Auto-refresh setiap 5 menit</div>
@@ -536,44 +497,6 @@ function renderFaqBlocks(blocks, query){
       : `<div class="content-row"><div class="col">-</div></div>`;
     return `<div class="faq-card ${b.type}"><div class="label">${escapeHtml(b.label)}</div><div class="content">${contentHtml}</div></div>`;
   }).join("");
-}
-
-/* ---------- UI: kartu statistik ---------- */
-function renderStats(){
-  const statsEl = document.getElementById("stats-row");
-  const totalRows = SHEETS.reduce((sum, n) => sum + (state[n]?.rows?.length || 0), 0);
-  const failedSheets = SHEETS.filter(n => state[n]?.error).length;
-  const accents = ["var(--amber)", "var(--teal)", "#8a7cf0"];
-
-  const cards = [
-    {
-      label: `<span class="live-dot"></span> Status`,
-      value: failedSheets === 0 ? "Live" : `${failedSheets} Error`,
-      sub: failedSheets === 0 ? "Terhubung ke Sheets API" : "Cek koneksi / API key",
-      accent: failedSheets === 0 ? "var(--teal)" : "var(--red)"
-    },
-    { label: "Total Baris", value: totalRows.toLocaleString('id-ID'), sub: `dari ${SHEETS.length} sheet`, accent: accents[0] },
-  ];
-  SHEETS.forEach((name, i) => {
-    const sState = state[name];
-    const isFaq = sState?.isFaq;
-    if(isFaq) return; // kartu untuk sheet FAQ (mis. BOLAA) tidak ditampilkan di stats-row
-    const value = sState?.rows?.length ?? 0;
-    cards.push({
-      label: name,
-      value: value.toLocaleString('id-ID'),
-      sub: sState?.error ? "Gagal dimuat" : "baris data",
-      accent: accents[(i+1) % accents.length]
-    });
-  });
-
-  statsEl.innerHTML = cards.map(c => `
-    <div class="stat-card" style="--stat-accent:${c.accent}">
-      <div class="stat-label">${c.label}</div>
-      <div class="stat-value">${c.value}</div>
-      <div class="stat-sub">${c.sub}</div>
-    </div>
-  `).join("");
 }
 
 /* ---------- UI: tabs ---------- */
@@ -783,7 +706,6 @@ async function loadAll(){
   }));
 
   buildTabs();
-  renderStats();
   SHEETS.forEach(name => { if(state[name].isFaq || state[name].headers) renderTable(name); });
   renderFlapClock();
   btn.classList.remove("spinning");
