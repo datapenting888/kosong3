@@ -255,7 +255,9 @@
 
 <script>
 /* ====================== KONFIGURASI ====================== */
-const SHEET_ID = "2PACX-1vQBvEVz6lEH_tpBZEGdOimTSXwp1AGygjpNYxWA769BtWzARVnxyosTk011_2y3Lm-4BrxXIeyTChBx";
+/* Terhubung langsung ke spreadsheet aslinya via Google Sheets API v4 */
+const SPREADSHEET_ID = "1KlWD9pye4vqIsxO6sv5XfyfO-e4CCSS6tcKqiP1DjY0";
+const API_KEY = "AIzaSyBRNBQxfptX2-BF1gJ3eqVNMFi8ne63Qv0";
 const SHEETS = ["RESULT", "DATA PENTING", "BOLAA"];
 const AUTO_REFRESH_MINUTES = 5;
 /* =========================================================== */
@@ -263,57 +265,45 @@ const AUTO_REFRESH_MINUTES = 5;
 const state = {}; // { sheetName: { headers:[], rows:[[]], filtered:[], sortCol:null, sortDir:1, query:'' } }
 let activeSheet = SHEETS[0];
 
-function gvizUrl(sheetName){
-  return `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
-}
-function pubhtmlUrl(){
-  return `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pubhtml`;
-}
-
-/* ---------- Parsing gviz JSON (dibungkus JSONP) ---------- */
-function parseGviz(text){
-  const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/);
-  const jsonStr = match ? match[1] : text;
-  const data = JSON.parse(jsonStr);
-  const cols = data.table.cols.map((c, i) => (c.label && c.label.trim()) || (c.id) || `Kolom ${i+1}`);
-  const rows = data.table.rows.map(r =>
-    r.c.map(cell => {
-      if(!cell) return "";
-      if(cell.f !== undefined && cell.f !== null) return cell.f; // formatted value
-      if(cell.v === null || cell.v === undefined) return "";
-      return cell.v;
-    })
-  );
-  return { headers: cols, rows };
+function sheetsApiUrl(sheetName){
+  // Ambil seluruh range sheet; batasi ke kolom A:ZZ agar tetap ringan pada sheet besar
+  const range = `${sheetName}!A1:ZZ`;
+  return `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(range)}?key=${API_KEY}`;
 }
 
-/* ---------- Fallback: parse tabel dari pubhtml ---------- */
-async function fetchViaPubhtmlFallback(sheetName){
-  const res = await fetch(pubhtmlUrl());
-  const html = await res.text();
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  // pubhtml biasanya punya beberapa <table> per sheet, dicocokkan lewat nama tab jika tersedia
-  const tables = Array.from(doc.querySelectorAll("table"));
-  if(tables.length === 0) throw new Error("Tabel tidak ditemukan pada pubhtml");
-  const idx = Math.min(SHEETS.indexOf(sheetName), tables.length - 1);
-  const table = tables[idx < 0 ? 0 : idx];
-  const trs = Array.from(table.querySelectorAll("tr"));
-  if(trs.length === 0) throw new Error("Baris kosong");
-  const headers = Array.from(trs[0].querySelectorAll("td,th")).map((c,i)=> c.textContent.trim() || `Kolom ${i+1}`);
-  const rows = trs.slice(1).map(tr => Array.from(tr.querySelectorAll("td,th")).map(c => c.textContent.trim()));
+/* ---------- Parsing respons Google Sheets API v4 ---------- */
+function parseSheetsApiResponse(json){
+  const values = json.values || [];
+  if(values.length === 0) return { headers: [], rows: [] };
+
+  const headerRow = values[0];
+  const bodyRows = values.slice(1);
+  const colCount = headerRow.length;
+
+  const headers = headerRow.map((h, i) => (h && String(h).trim()) || `Kolom ${i + 1}`);
+
+  // Google Sheets API memotong sel kosong di akhir baris — ratakan panjang tiap baris
+  const rows = bodyRows.map(row => {
+    const padded = row.slice(0, colCount);
+    while(padded.length < colCount) padded.push("");
+    return padded;
+  });
+
   return { headers, rows };
 }
 
 async function fetchSheet(sheetName){
-  try{
-    const res = await fetch(gvizUrl(sheetName));
-    if(!res.ok) throw new Error("gviz gagal: " + res.status);
-    const text = await res.text();
-    return parseGviz(text);
-  }catch(err){
-    console.warn(`gviz gagal untuk ${sheetName}, mencoba fallback pubhtml`, err);
-    return await fetchViaPubhtmlFallback(sheetName);
+  const res = await fetch(sheetsApiUrl(sheetName));
+  if(!res.ok){
+    let detail = res.status;
+    try{
+      const errJson = await res.json();
+      detail = errJson?.error?.message || detail;
+    }catch(_){ /* abaikan, pakai status code */ }
+    throw new Error(`Gagal ambil sheet "${sheetName}": ${detail}`);
   }
+  const json = await res.json();
+  return parseSheetsApiResponse(json);
 }
 
 /* ---------- UI: tabs ---------- */
