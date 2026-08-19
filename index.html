@@ -275,6 +275,8 @@
   .faq-card.topic .label{ background: linear-gradient(160deg, #8a2e28, #601e19); }
   .faq-card.example{ border-left-color:#8a8f97; }
   .faq-card.example .label{ background: linear-gradient(160deg, #7d828a, #5d6167); }
+  .faq-card.today-row{ background:#132420; border-left-color:#3ddbc4; }
+  .faq-card.today-row .label{ background: linear-gradient(160deg, #1f6f5f, #123f34); }
 
   .content-row{ display:flex; gap:22px; flex-wrap:wrap; }
   .content-row .col{ flex:1 1 220px; min-width: 200px; color: var(--amber); font-size:13px; line-height:1.65; }
@@ -578,34 +580,22 @@ function renderTable(name){
 
   const todayStr = new Date().toLocaleDateString('id-ID', { day:'2-digit', month:'2-digit', year:'numeric' }).replace(/\//g,'-');
   const dateColIdx = s.headers.findIndex(h => /tanggal|date|tgl/i.test(h));
-  const numericCols = detectNumericColumns(s.rows, s.headers.length);
 
-  let thead = "<tr><th class=\"rownum-head\">#</th>" + s.headers.map((h, i) => {
-    const sorted = s.sortCol === i;
-    const arrow = sorted ? (s.sortDir === 1 ? "▲" : "▼") : "▲";
-    return `<th data-col="${i}" class="${sorted ? 'sorted' : ''}">${escapeHtml(h)}<span class="arrow">${arrow}</span></th>`;
-  }).join("") + "</tr>";
-
-  let tbody = rows.map((row, ri) => {
+  const cardsHtml = rows.map((row, ri) => {
     let isToday = false;
     if(dateColIdx >= 0){
       const cellVal = String(row[dateColIdx] ?? "");
       if(cellVal.includes(todayStr) || cellVal === todayStr) isToday = true;
     }
-    const tds = row.map((cell, ci) => `<td class="${numericCols[ci] ? 'num' : ''}">${formatCell(cell)}</td>`).join("");
-    return `<tr class="${isToday ? 'today' : ''}"><td class="rownum">${ri + 1}</td>${tds}</tr>`;
+    const cols = row.map(cell => {
+      const val = String(cell ?? "").trim();
+      const display = val === "" ? "-" : linkify(formatCell(cell));
+      return `<div class="col">${display}</div>`;
+    }).join("");
+    return `<div class="faq-card example${isToday ? ' today-row' : ''}"><div class="label">#${ri + 1}</div><div class="content"><div class="content-row">${cols}</div></div></div>`;
   }).join("");
 
-  scrollEl.innerHTML = `<table><thead>${thead}</thead><tbody>${tbody}</tbody></table>`;
-
-  scrollEl.querySelectorAll("thead th").forEach(th => {
-    th.addEventListener("click", () => {
-      const col = parseInt(th.dataset.col, 10);
-      if(s.sortCol === col){ s.sortDir *= -1; } else { s.sortCol = col; s.sortDir = 1; }
-      s.filtered.sort((a,b) => compareVals(a[col], b[col]) * s.sortDir);
-      renderTable(name);
-    });
-  });
+  scrollEl.innerHTML = `<div class="faq-container">${cardsHtml}</div>`;
 }
 
 function formatCell(val){
