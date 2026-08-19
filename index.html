@@ -203,6 +203,10 @@
   }
   .faq-container > *{ border-bottom: 3px solid #1d4857; }
   .faq-container > *:last-child{ border-bottom: none; }
+  /* Baris kosong pada spreadsheet asli (di antara kartu) -> ditampilkan sebagai jarak kosong, tanpa garis pemisah */
+  .faq-container > .faq-spacer{ border-bottom: none; height: 18px; }
+  /* Baris kosong di dalam 1 kartu (mis. di antara 2 baris jawaban) -> jarak kosong tanpa border */
+  .content-spacer{ height: 10px; }
   .faq-title{
     color:#4fe0c4; font-family: var(--display); font-weight:800; font-size:14px;
     letter-spacing:0.06em; text-transform:uppercase; text-align:center;
@@ -390,7 +394,15 @@ function buildFaqBlocks(allRows){
   const rawBlocks = [];
   let current = null;
   let inPreamble = true; // area "LINK BOLA" di paling atas, sebelum topik pertama muncul
-  const pushCurrent = () => { if(current){ rawBlocks.push(current); current = null; } };
+  const pushCurrent = () => {
+    if(current){
+      // buang penanda baris kosong di paling awal/akhir kartu, biar tidak ada jarak kosong menggantung
+      while(current.rows.length && current.rows[0] === null) current.rows.shift();
+      while(current.rows.length && current.rows[current.rows.length - 1] === null) current.rows.pop();
+      rawBlocks.push(current);
+      current = null;
+    }
+  };
 
   allRows.forEach(row => {
     // Pakai sel pertama yang benar-benar berisi teks sebagai kandidat "label" —
@@ -398,7 +410,15 @@ function buildFaqBlocks(allRows){
     const nonEmpty = row
       .map((c, i) => ({ i, v: String(c ?? "").trim() }))
       .filter(o => o.v !== "");
-    if(nonEmpty.length === 0) return; // baris benar-benar kosong -> lewati
+    if(nonEmpty.length === 0){
+      // Baris kosong pada spreadsheet asli -> ikuti sebagai jarak kosong di tampilan
+      if(current){
+        current.rows.push(null); // penanda jarak kosong di dalam kartu yang sedang terbuka
+      }else if(rawBlocks.length && rawBlocks[rawBlocks.length - 1].type !== "spacer"){
+        rawBlocks.push({ type: "spacer" });
+      }
+      return;
+    }
 
     const isLabelCol = nonEmpty[0].i === 0;
     const label = isLabelCol ? nonEmpty[0].v : "";
@@ -446,6 +466,10 @@ function buildFaqBlocks(allRows){
   });
   pushCurrent();
 
+  // Buang spacer yang menggantung di paling awal/akhir daftar
+  while(rawBlocks.length && rawBlocks[0].type === "spacer") rawBlocks.shift();
+  while(rawBlocks.length && rawBlocks[rawBlocks.length - 1].type === "spacer") rawBlocks.pop();
+
   // Gabungkan baris-baris link berurutan jadi satu kartu putih (mis. LINK BOLA)
   const merged = [];
   let linkGroup = null;
@@ -469,12 +493,16 @@ function linkify(escapedText){
 
 function renderFaqBlocks(blocks, query){
   const q = (query || "").toLowerCase();
-  const rowsMatch = rows => !q || rows.some(cols => cols.some(c => c.toLowerCase().includes(q)));
+  const rowsMatch = rows => !q || rows.some(cols => cols && cols.some(c => c.toLowerCase().includes(q)));
 
   return blocks.map(b => {
     if(b.type === "title"){
       if(q && !b.text.toLowerCase().includes(q)) return "";
       return `<div class="faq-title">${escapeHtml(b.text)}</div>`;
+    }
+
+    if(b.type === "spacer"){
+      return q ? "" : `<div class="faq-spacer"></div>`;
     }
 
     if(b.type === "linkGroup"){
@@ -495,7 +523,10 @@ function renderFaqBlocks(blocks, query){
     // question / topic (termasuk jawaban) / example -> kartu label + konten (mendukung kolom ganda)
     if(!rowsMatch(b.rows)) return "";
     const contentHtml = b.rows.length
-      ? b.rows.map(cols => `<div class="content-row">${cols.map(c => `<div class="col">${linkify(escapeHtml(c))}</div>`).join("")}</div>`).join("")
+      ? b.rows.map(cols => cols === null
+          ? `<div class="content-spacer"></div>`
+          : `<div class="content-row">${cols.map(c => `<div class="col">${linkify(escapeHtml(c))}</div>`).join("")}</div>`
+        ).join("")
       : "";
     return `<div class="faq-card ${b.type}"><div class="label">${linkify(escapeHtml(b.label))}</div>${contentHtml ? `<div class="content">${contentHtml}</div>` : ""}</div>`;
   }).join("");
