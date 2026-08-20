@@ -34,18 +34,23 @@
     color: var(--text);
     font-family: var(--sans);
     -webkit-font-smoothing: antialiased;
+    height: 100%;
+    overflow: hidden;
   }
 
   body{
     background-image:
       radial-gradient(circle at 15% 0%, rgba(240,168,60,0.06), transparent 40%),
       radial-gradient(circle at 85% 10%, rgba(61,219,196,0.05), transparent 45%);
-    min-height: 100vh;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
 
   /* ---------- Top bar ---------- */
   .topbar{
-    position: sticky; top:0; z-index: 50;
+    flex-shrink: 0;
+    position: relative; top:0; z-index: 50;
     background: rgba(13,16,21,0.88);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border);
@@ -105,10 +110,18 @@
   @keyframes spin{ to{ transform: rotate(360deg); } }
 
   /* ---------- Layout ---------- */
-  .wrap{ max-width: 1180px; margin: 0 auto; padding: 26px 20px 60px; }
+  .wrap{
+    max-width: 1180px; width: 100%; margin: 0 auto;
+    padding: 20px 20px 16px;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
 
   .tabs{
-    display:flex; gap: 6px; margin-bottom: 20px;
+    flex-shrink: 0;
+    display:flex; gap: 6px; margin-bottom: 16px;
     border-bottom: 1px solid var(--border);
   }
   .tab{
@@ -133,8 +146,12 @@
     background: var(--surface-2); padding: 1px 6px; border-radius: 10px;
   }
 
-  .panel{ display:none; }
-  .panel.active{ display:block; animation: fadeUp .35s ease; }
+  #panels{ flex: 1 1 auto; min-height: 0; position: relative; }
+  .panel{ display:none; height: 100%; }
+  .panel.active{
+    display:flex; flex-direction:column; height:100%;
+    animation: fadeUp .35s ease;
+  }
   @keyframes fadeUp{ from{ opacity:0; transform: translateY(6px);} to{opacity:1; transform:translateY(0);} }
 
   .table-shell{
@@ -142,8 +159,15 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
-  .table-scroll{ overflow-x: auto; max-height: 62vh; overflow-y:auto; }
+  .table-scroll{
+    overflow-x: auto; overflow-y:auto;
+    flex: 1 1 auto; min-height: 0;
+  }
   table{ width:100%; border-collapse: collapse; font-size: 13px; }
   thead th{
     position: sticky; top:0; z-index:2;
