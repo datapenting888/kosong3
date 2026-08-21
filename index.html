@@ -6,34 +6,25 @@
 <title>HARIAN — Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/motion@11/dist/motion.js"></script>
 <style>
   :root{
     --bg: #14181f;
     --bg-deep: #0d1015;
     --surface: #1b212b;
     --surface-2: #212834;
-    --surface-3: #262e3b;
     --border: #2b3340;
-    --border-soft: rgba(255,255,255,0.06);
     --text: #eef2f6;
     --text-muted: #8994a3;
     --text-dim: #5c6674;
     --amber: #f0a83c;
-    --amber-soft: #ffc773;
     --amber-dim: #6b5027;
-    --amber-glow: rgba(240,168,60,0.35);
     --teal: #3ddbc4;
-    --teal-soft: #7dfff0;
     --teal-dim: #1f4a44;
-    --teal-glow: rgba(61,219,196,0.3);
     --red: #e8637a;
     --radius: 10px;
     --mono: 'IBM Plex Mono', ui-monospace, monospace;
     --sans: 'Inter', sans-serif;
     --display: 'Archivo', sans-serif;
-    --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-    --ease: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   *{ box-sizing:border-box; }
@@ -49,26 +40,11 @@
 
   body{
     background-image:
-      radial-gradient(circle at 15% 0%, rgba(240,168,60,0.07), transparent 42%),
-      radial-gradient(circle at 85% 6%, rgba(61,219,196,0.06), transparent 48%),
-      radial-gradient(circle at 50% 100%, rgba(240,168,60,0.03), transparent 60%);
+      radial-gradient(circle at 15% 0%, rgba(240,168,60,0.06), transparent 40%),
+      radial-gradient(circle at 85% 10%, rgba(61,219,196,0.05), transparent 45%);
     height: 100vh;
     display: flex;
     flex-direction: column;
-  }
-
-  ::-webkit-scrollbar{ width:9px; height:9px; }
-  ::-webkit-scrollbar-track{ background: transparent; }
-  ::-webkit-scrollbar-thumb{
-    background: var(--surface-3); border-radius: 20px;
-    border: 2px solid var(--bg-deep);
-  }
-  ::-webkit-scrollbar-thumb:hover{ background: var(--amber-dim); }
-
-  :focus-visible{ outline: 2px solid var(--amber); outline-offset: 2px; border-radius: 4px; }
-
-  @media (prefers-reduced-motion: reduce){
-    *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
   }
 
   /* ---------- Top bar ---------- */
@@ -76,14 +52,9 @@
     flex-shrink: 0;
     position: relative; top:0; z-index: 50;
     background: rgba(13,16,21,0.88);
-    backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border);
     padding: 14px 20px;
-  }
-  .topbar::after{
-    content:''; position:absolute; left:0; right:0; bottom:-1px; height:1px;
-    background: linear-gradient(90deg, transparent, var(--amber-glow) 20%, var(--teal-glow) 55%, transparent 85%);
-    opacity: 0.6;
   }
   .topbar-inner{
     width: 100%; margin: 0 auto;
@@ -94,16 +65,10 @@
   .brand-mark{
     width: 38px; height: 38px; border-radius: 9px;
     background: linear-gradient(155deg, var(--amber), #c97f1e);
-    background-size: 220% 220%;
     display:flex; align-items:center; justify-content:center;
     font-family: var(--display); font-weight:900; font-size: 17px;
-    color: #1a1305; position: relative; overflow:hidden;
-    box-shadow: 0 4px 14px rgba(240,168,60,0.28), 0 0 0 1px rgba(255,255,255,0.06) inset;
-    animation: brandSheen 7s ease-in-out infinite;
-  }
-  @keyframes brandSheen{
-    0%,100%{ background-position: 0% 50%; }
-    50%{ background-position: 100% 50%; }
+    color: #1a1305;
+    box-shadow: 0 4px 14px rgba(240,168,60,0.25);
   }
   .brand-text h1{
     margin:0; font-family: var(--display); font-weight: 800;
@@ -111,19 +76,12 @@
   }
   .brand-text span{
     font-size: 11px; color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase;
-    display:inline-flex; align-items:center; gap:6px;
   }
-  .brand-text span::before{
-    content:''; width:5px; height:5px; border-radius:50%; background: var(--teal);
-    box-shadow: 0 0 6px var(--teal); flex-shrink:0;
-    animation: pulseDot 2.4s ease-in-out infinite;
-  }
-  @keyframes pulseDot{ 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:0.4; transform:scale(0.75); } }
 
   .clock-wrap{ display:flex; align-items:center; gap: 14px; }
-  .flap-clock{ display:flex; gap:4px; perspective: 200px; }
+  .flap-clock{ display:flex; gap:4px; }
   .flap{
-    background: linear-gradient(180deg, var(--surface-3), var(--surface-2));
+    background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: 5px;
     font-family: var(--mono); font-weight:700; font-size: 15px;
@@ -131,24 +89,10 @@
     width: 24px; height: 30px;
     display:flex; align-items:center; justify-content:center;
     position: relative; overflow:hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.02) inset;
-    transform-style: preserve-3d;
   }
   .flap::after{
     content:''; position:absolute; left:0; right:0; top:50%;
-    height:1px; background: rgba(0,0,0,0.45);
-  }
-  .flap::before{
-    content:''; position:absolute; inset:0;
-    background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent 45%);
-    pointer-events:none;
-  }
-  .flap.flip{ animation: flapFlip .5s var(--ease); }
-  @keyframes flapFlip{
-    0%{ transform: rotateX(0deg); }
-    45%{ transform: rotateX(-95deg); color: var(--amber-soft); }
-    55%{ transform: rotateX(-95deg); }
-    100%{ transform: rotateX(0deg); }
+    height:1px; background: rgba(0,0,0,0.4);
   }
   .clock-label{ font-size: 10px; color: var(--text-dim); text-transform:uppercase; letter-spacing:0.1em; }
 
@@ -157,14 +101,13 @@
     color: var(--text); font-family: var(--sans); font-weight:600; font-size: 13px;
     padding: 9px 14px; border-radius: 8px; cursor:pointer;
     display:flex; align-items:center; gap:8px;
-    transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
-    position: relative;
+    transition: border-color .15s ease, transform .15s ease;
   }
-  .refresh-btn:hover{ border-color: var(--amber); box-shadow: 0 0 0 3px rgba(240,168,60,0.08); }
+  .refresh-btn:hover{ border-color: var(--amber); }
+  .refresh-btn:active{ transform: scale(0.96); }
   .refresh-btn svg{ width:14px; height:14px; transition: transform .5s ease; }
   .refresh-btn.spinning svg{ animation: spin 0.7s linear infinite; }
   @keyframes spin{ to{ transform: rotate(360deg); } }
-  .refresh-btn.success{ border-color: var(--teal); color: var(--teal-soft); }
 
   /* ---------- Layout ---------- */
   .wrap{
@@ -178,7 +121,6 @@
 
   .tabs{
     flex-shrink: 0;
-    position: relative;
     display:flex; gap: 6px; margin-bottom: 16px;
     border-bottom: 1px solid var(--border);
   }
@@ -189,37 +131,28 @@
     color: var(--text-muted);
     border-bottom: 2.5px solid transparent;
     display:flex; align-items:center; gap:8px;
-    transition: color .18s ease;
+    transition: color .15s ease;
     user-select:none;
-    border-radius: 8px 8px 0 0;
   }
   .tab .dot{
     width:6px; height:6px; border-radius:50%;
     background: var(--text-dim);
-    transition: background .18s ease, box-shadow .18s ease;
   }
-  .tab.active{ color: var(--text); border-bottom-color: transparent; }
+  .tab.active{ color: var(--text); border-bottom-color: var(--amber); }
   .tab.active .dot{ background: var(--amber); box-shadow: 0 0 8px var(--amber); }
-  .tab:hover:not(.active){ color: var(--text); background: rgba(255,255,255,0.02); }
+  .tab:hover:not(.active){ color: var(--text); }
   .tab .count{
     font-family: var(--mono); font-size: 11px; color: var(--text-dim);
     background: var(--surface-2); padding: 1px 6px; border-radius: 10px;
-    transition: background .18s ease, color .18s ease;
-  }
-  .tab.active .count{ background: var(--amber-dim); color: var(--amber-soft); }
-  .tab-indicator{
-    position:absolute; bottom:-1px; height:2.5px;
-    background: linear-gradient(90deg, var(--amber), var(--amber-soft));
-    border-radius: 3px 3px 0 0;
-    box-shadow: 0 0 10px var(--amber-glow);
-    pointer-events:none;
   }
 
   #panels{ flex: 1 1 auto; min-height: 0; position: relative; }
   .panel{ display:none; height: 100%; }
   .panel.active{
     display:flex; flex-direction:column; height:100%;
+    animation: fadeUp .35s ease;
   }
+  @keyframes fadeUp{ from{ opacity:0; transform: translateY(6px);} to{opacity:1; transform:translateY(0);} }
 
   .table-shell{
     background: var(--surface);
@@ -230,7 +163,6 @@
     min-height: 0;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.28), 0 0 0 1px var(--border-soft) inset;
   }
   .table-scroll{
     overflow-x: auto; overflow-y:auto;
@@ -262,8 +194,8 @@
   }
   th.rownum-head{ width: 38px; text-align:center; background: var(--surface-2); }
   tbody tr:nth-child(even){ background: rgba(255,255,255,0.012); }
-  tbody tr{ transition: background .15s ease; }
-  tbody tr:hover{ background: rgba(240,168,60,0.06); }
+  tbody tr{ transition: background .1s ease; }
+  tbody tr:hover{ background: rgba(240,168,60,0.045); }
   tbody tr.today{ background: rgba(61,219,196,0.07); }
   tbody tr.today td:first-child{ box-shadow: inset 3px 0 0 var(--teal); }
   tbody tr:last-child td{ border-bottom:none; }
@@ -271,7 +203,6 @@
   .badge{
     display:inline-block; padding: 2px 9px; border-radius: 20px;
     font-size: 11px; font-weight:600; font-family: var(--sans);
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset;
   }
   .badge.win{ background: rgba(61,219,196,0.14); color: var(--teal); }
   .badge.lose{ background: rgba(232,99,122,0.14); color: var(--red); }
@@ -330,9 +261,7 @@
   .faq-card{
     display:flex; align-items:stretch; border-radius:6px; overflow:hidden;
     background:#0a0d11; border-left: 3px solid transparent;
-    transition: background .18s ease;
   }
-  .faq-card:hover{ background:#0d1116; }
   .faq-card .label{
     flex:0 0 130px; display:flex; align-items:center; justify-content:center;
     text-align:center; padding:10px 10px;
@@ -360,8 +289,7 @@
   /* Baris polos (mis. sheet RESULT) — tanpa kotak label nomor, mendekati tampilan spreadsheet asli */
   /* Baris yang berdempetan (tanpa baris kosong di antaranya) digabung dalam 1 .plain-block, */
   /* tanpa garis pemisah di antara baris2 di dalamnya — supaya tetap terasa 1 kesatuan / 1 kata. */
-  .plain-block{ background:#0a0d11; padding: 8px 0; transition: background .18s ease; }
-  .plain-block:hover{ background:#0d1116; }
+  .plain-block{ background:#0a0d11; padding: 8px 0; }
   .faq-container > .plain-block{ border-bottom: 3px solid #1d4857; }
   .faq-container > .plain-block:last-child{ border-bottom: none; }
   .plain-block:has(.plain-row.today-row){ background:#132420; }
@@ -412,7 +340,7 @@
 </div>
 
 <div class="wrap">
-  <div class="tabs" id="tabs"><div class="tab-indicator" id="tab-indicator"></div></div>
+  <div class="tabs" id="tabs"></div>
   <div id="panels"></div>
 </div>
 
@@ -631,7 +559,7 @@ function renderFaqBlocks(blocks, query){
 /* ---------- UI: tabs ---------- */
 function buildTabs(){
   const tabsEl = document.getElementById("tabs");
-  tabsEl.querySelectorAll(".tab").forEach(t => t.remove());
+  tabsEl.innerHTML = "";
   SHEETS.forEach(name => {
     const tab = document.createElement("div");
     tab.className = "tab" + (name === activeSheet ? " active" : "");
@@ -644,40 +572,12 @@ function buildTabs(){
     tab.addEventListener("click", () => switchTab(name));
     tabsEl.appendChild(tab);
   });
-  moveTabIndicator(false);
-}
-
-function moveTabIndicator(withMotion){
-  const tabsEl = document.getElementById("tabs");
-  const indicator = document.getElementById("tab-indicator");
-  const activeTab = tabsEl.querySelector(`.tab[data-sheet="${CSS.escape(activeSheet)}"]`);
-  if(!activeTab || !indicator) return;
-  const target = { left: activeTab.offsetLeft, width: activeTab.offsetWidth };
-  if(withMotion && window.Motion){
-    Motion.animate(indicator, target, { duration: 0.45, easing: [0.34, 1.56, 0.64, 1] });
-  }else{
-    indicator.style.left = target.left + "px";
-    indicator.style.width = target.width + "px";
-  }
 }
 
 function switchTab(name){
-  if(name === activeSheet) return;
-  const prevPanel = document.querySelector(`.panel[data-sheet="${CSS.escape(activeSheet)}"]`);
   activeSheet = name;
   document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.sheet === name));
-  moveTabIndicator(true);
-
-  const nextPanel = document.querySelector(`.panel[data-sheet="${CSS.escape(name)}"]`);
-  document.querySelectorAll(".panel").forEach(p => { if(p !== nextPanel) p.classList.remove("active"); });
-  nextPanel.classList.add("active");
-
-  if(window.Motion){
-    if(prevPanel && prevPanel !== nextPanel){
-      Motion.animate(prevPanel, { opacity: [1, 0] }, { duration: 0.15 });
-    }
-    Motion.animate(nextPanel, { opacity: [0, 1], y: [8, 0] }, { duration: 0.35, easing: [0.16, 1, 0.3, 1] });
-  }
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.dataset.sheet === name));
 }
 
 /* ---------- UI: panel per sheet ---------- */
@@ -708,7 +608,6 @@ function renderTable(name){
     scrollEl.innerHTML = html.trim()
       ? `<div class="faq-container">${html}</div>`
       : `<div class="state">Tidak ada yang cocok</div>`;
-    animateEntrance(scrollEl.querySelectorAll(".faq-container > *"));
     return;
   }
 
@@ -764,17 +663,6 @@ function renderTable(name){
   scrollEl.innerHTML = cardsHtml
     ? `<div class="faq-container">${cardsHtml}</div>`
     : `<div class="state">Tidak ada data yang cocok</div>`;
-  animateEntrance(scrollEl.querySelectorAll(".faq-container > *"));
-}
-
-/* ---------- Motion helper: animasi masuk stagger untuk kartu/baris ---------- */
-function animateEntrance(elements){
-  if(!window.Motion || !elements || !elements.length) return;
-  Motion.animate(
-    elements,
-    { opacity: [0, 1], y: [10, 0] },
-    { duration: 0.4, delay: Motion.stagger(0.025, { limit: 40 }), easing: [0.16, 1, 0.3, 1] }
-  );
 }
 
 function formatCell(val){
@@ -812,7 +700,6 @@ function escapeHtml(str){
 }
 
 /* ---------- Flip clock ---------- */
-let prevClockChars = null;
 function renderFlapClock(){
   const now = new Date();
   const parts = [
@@ -822,32 +709,15 @@ function renderFlapClock(){
     String(now.getMinutes()).padStart(2,'0'),
   ];
   const clock = document.getElementById("flap-clock");
+  clock.innerHTML = "";
   const chars = (parts[0] + parts[1] + "·" + parts[2] + parts[3]).split("");
-
-  if(clock.children.length !== chars.length){
-    clock.innerHTML = "";
-    chars.forEach(ch => {
-      const div = document.createElement("div");
-      div.className = "flap";
-      div.textContent = ch;
-      if(ch === "·"){ div.style.background = "transparent"; div.style.border = "none"; div.style.color = "var(--text-dim)"; }
-      clock.appendChild(div);
-    });
-  }else{
-    chars.forEach((ch, i) => {
-      const div = clock.children[i];
-      if(prevClockChars && prevClockChars[i] !== ch){
-        div.classList.remove("flip");
-        void div.offsetWidth; // reset animasi
-        div.textContent = ch;
-        div.classList.add("flip");
-      }else if(!prevClockChars){
-        div.textContent = ch;
-      }
-    });
-  }
-  prevClockChars = chars;
-
+  chars.forEach(ch => {
+    const div = document.createElement("div");
+    div.className = "flap";
+    div.textContent = ch;
+    if(ch === "·"){ div.style.background = "transparent"; div.style.border = "none"; div.style.color = "var(--text-dim)"; }
+    clock.appendChild(div);
+  });
   document.getElementById("last-update-label").textContent =
     now.toLocaleString('id-ID', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
 }
@@ -856,9 +726,6 @@ function renderFlapClock(){
 async function loadAll(){
   const btn = document.getElementById("refresh-btn");
   btn.classList.add("spinning");
-  if(window.Motion){
-    Motion.animate(btn, { scale: [1, 0.94, 1] }, { duration: 0.35, easing: [0.34, 1.56, 0.64, 1] });
-  }
 
   await Promise.all(SHEETS.map(async name => {
     try{
@@ -882,8 +749,6 @@ async function loadAll(){
   SHEETS.forEach(name => { if(state[name].isFaq || state[name].headers) renderTable(name); });
   renderFlapClock();
   btn.classList.remove("spinning");
-  btn.classList.add("success");
-  setTimeout(() => btn.classList.remove("success"), 900);
 }
 
 /* ---------- Init ---------- */
@@ -893,13 +758,6 @@ function init(){
   buildTabs();
 
   document.getElementById("refresh-btn").addEventListener("click", loadAll);
-  window.addEventListener("resize", () => moveTabIndicator(false));
-
-  if(window.Motion){
-    Motion.animate(".topbar", { opacity: [0, 1], y: [-14, 0] }, { duration: 0.5, easing: [0.16, 1, 0.3, 1] });
-    Motion.animate(".tab", { opacity: [0, 1], y: [8, 0] }, { duration: 0.4, delay: Motion.stagger(0.06), easing: [0.16, 1, 0.3, 1] });
-    Motion.animate(".table-shell", { opacity: [0, 1] }, { duration: 0.5, delay: 0.15 });
-  }
 
   loadAll();
   setInterval(loadAll, AUTO_REFRESH_MINUTES * 60 * 1000);
