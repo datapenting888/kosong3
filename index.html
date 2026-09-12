@@ -14,16 +14,17 @@
     --surface-hover: rgba(27, 36, 56, 0.8);
     --border: rgba(255, 255, 255, 0.08);
     --border-glow: rgba(99, 102, 241, 0.3);
-    --text: #f3f4f6;
-    --text-muted: #9ca3af;
-    --text-dim: #6b7280;
     
-    /* Aksen Warna Modern & Elegan */
-    --accent: #6366f1; /* Indigo Modern */
+    /* Warna teks diubah menjadi putih bersih */
+    --text: #ffffff;
+    --text-muted: #e5e7eb;
+    --text-dim: #9ca3af;
+    
+    --accent: #6366f1;
     --accent-glow: rgba(99, 102, 241, 0.25);
-    --amber: #f59e0b;
-    --teal: #14b8a6;
-    --red: #f43f5e;
+    --amber: #fbbf24;
+    --teal: #2dd4bf;
+    --red: #fb7185;
     
     --radius: 14px;
     --radius-sm: 8px;
@@ -43,7 +44,6 @@
     overflow: hidden;
   }
 
-  /* Latar Belakang dengan Efek Gradient Glow Modern */
   body {
     background-image:
       radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.12), transparent 45%),
@@ -53,7 +53,7 @@
     flex-direction: column;
   }
 
-  /* ---------- Top bar (Glassmorphism) ---------- */
+  /* ---------- Top bar ---------- */
   .topbar {
     flex-shrink: 0;
     position: relative; z-index: 50;
@@ -70,19 +70,19 @@
   }
   .brand { display: flex; align-items: center; gap: 14px; }
   .brand-mark {
-    width: 42px; height: 42px; border-radius: 12px;
+    width: 46px; height: 46px; border-radius: 12px;
     background: linear-gradient(135deg, #6366f1, #4f46e5);
     display: flex; align-items: center; justify-content: center;
-    font-family: var(--sans); font-weight: 800; font-size: 20px;
+    font-family: var(--sans); font-weight: 800; font-size: 24px;
     color: #fff;
     box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
   }
   .brand-text h1 {
     margin: 0; font-family: var(--sans); font-weight: 800;
-    font-size: 18px; letter-spacing: -0.01em; color: #fff;
+    font-size: 22px; color: #fff;
   }
   .brand-text span {
-    font-size: 11px; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600;
+    font-size: 15px; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600;
   }
 
   .clock-wrap { display: flex; align-items: center; gap: 16px; }
@@ -91,9 +91,9 @@
     background: var(--surface-solid);
     border: 1px solid var(--border);
     border-radius: 6px;
-    font-family: var(--mono); font-weight: 600; font-size: 14px;
+    font-family: var(--mono); font-weight: 600; font-size: 18px;
     color: var(--amber);
-    width: 26px; height: 32px;
+    width: 30px; height: 36px;
     display: flex; align-items: center; justify-content: center;
     position: relative; overflow: hidden;
   }
@@ -101,18 +101,18 @@
     content: ''; position: absolute; left: 0; right: 0; top: 50%;
     height: 1px; background: rgba(0,0,0,0.3);
   }
-  .clock-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-bottom: 2px;}
+  .clock-label { font-size: 14px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-bottom: 2px;}
 
   .refresh-btn {
     background: var(--surface-solid); border: 1px solid var(--border);
-    color: var(--text); font-family: var(--sans); font-weight: 600; font-size: 13px;
-    padding: 10px 16px; border-radius: var(--radius-sm); cursor: pointer;
+    color: var(--text); font-family: var(--sans); font-weight: 600; font-size: 17px;
+    padding: 12px 18px; border-radius: var(--radius-sm); cursor: pointer;
     display: flex; align-items: center; gap: 8px;
     transition: all 0.2s ease;
   }
   .refresh-btn:hover { border-color: var(--accent); background: var(--surface-hover); box-shadow: 0 0 15px var(--accent-glow); }
   .refresh-btn:active { transform: scale(0.97); }
-  .refresh-btn svg { width: 14px; height: 14px; transition: transform .5s ease; }
+  .refresh-btn svg { width: 18px; height: 18px; transition: transform .5s ease; }
   .refresh-btn.spinning svg { animation: spin 0.7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -126,7 +126,7 @@
     flex-direction: column;
   }
 
-  /* ---------- Tab Navigasi Modern ---------- */
+  /* ---------- Tab Navigasi ---------- */
   .tabs {
     flex-shrink: 0;
     display: flex; gap: 8px; margin-bottom: 20px;
@@ -134,9 +134,8 @@
     padding-bottom: 4px;
   }
   .tab {
-    font-family: var(--sans); font-weight: 700; font-size: 13px;
-    letter-spacing: 0.01em;
-    padding: 10px 18px; cursor: pointer;
+    font-family: var(--sans); font-weight: 700; font-size: 17px;
+    padding: 12px 20px; cursor: pointer;
     color: var(--text-muted);
     border-radius: var(--radius-sm) var(--radius-sm) 0 0;
     border-bottom: 2px solid transparent;
@@ -145,15 +144,15 @@
     user-select: none;
   }
   .tab .dot {
-    width: 6px; height: 6px; border-radius: 50%;
+    width: 10px; height: 10px; border-radius: 50%;
     background: var(--text-dim);
   }
   .tab.active { color: #fff; background: rgba(99, 102, 241, 0.08); border-bottom-color: var(--accent); }
   .tab.active .dot { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-  .tab:hover:not(.active) { color: var(--text); background: rgba(255,255,255,0.02); }
+  .tab:hover:not(.active) { color: #fff; background: rgba(255,255,255,0.02); }
   .tab .count {
-    font-family: var(--mono); font-size: 10.5px; color: var(--text-dim);
-    background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 10px;
+    font-family: var(--mono); font-size: 14px; color: var(--text-dim);
+    background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 10px;
   }
 
   #panels { flex: 1 1 auto; min-height: 0; position: relative; }
@@ -182,20 +181,19 @@
     flex: 1 1 auto; min-height: 0;
   }
 
-  /* ---------- Kontainer Dokumen / FAQ (Grid & Cards Estetik) ---------- */
+  /* ---------- Kontainer Dokumen / FAQ ---------- */
   .faq-container {
     display: flex; flex-direction: column; gap: 12px; padding: 18px;
   }
   
   .faq-title {
-    color: var(--teal); font-family: var(--sans); font-weight: 800; font-size: 13px;
+    color: var(--teal); font-family: var(--sans); font-weight: 800; font-size: 17px;
     letter-spacing: 0.08em; text-transform: uppercase; text-align: center;
-    padding: 12px; background: rgba(20, 184, 166, 0.06); border-radius: var(--radius-sm);
+    padding: 14px; background: rgba(20, 184, 166, 0.06); border-radius: var(--radius-sm);
     border: 1px dashed rgba(20, 184, 166, 0.2);
     margin-bottom: 4px;
   }
 
-  /* Kartu Link Modern */
   .faq-link-card {
     background: rgba(18, 24, 38, 0.8); border-radius: var(--radius); overflow: hidden;
     border: 1px solid var(--border); margin-bottom: 4px;
@@ -203,21 +201,20 @@
   }
   .faq-link-row {
     display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-    padding: 12px 18px; border-bottom: 1px solid var(--border);
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
   }
   .faq-link-row:last-child { border-bottom: none; }
   .faq-link-label {
-    font-weight: 700; color: #fff; font-size: 13px; font-family: var(--sans);
+    font-weight: 700; color: #fff; font-size: 17px; font-family: var(--sans);
     white-space: nowrap; min-width: 150px;
   }
   .faq-link {
-    color: #818cf8; font-family: var(--mono); font-size: 12.5px; text-decoration: none;
+    color: #a5b4fc; font-family: var(--mono); font-size: 16.5px; text-decoration: none;
     word-break: break-all; display: inline-flex; align-items: center; gap: 6px;
     transition: color 0.15s;
   }
-  .faq-link:hover { color: #a5b4fc; text-decoration: underline; }
+  .faq-link:hover { color: #c7d2fe; text-decoration: underline; }
 
-  /* Kartu Topik / FAQ dengan Efek Aksen Pinggir */
   .faq-card {
     display: flex; align-items: stretch; border-radius: var(--radius-sm); overflow: hidden;
     background: rgba(15, 22, 36, 0.6); border: 1px solid var(--border);
@@ -227,14 +224,14 @@
   .faq-card:hover { border-color: rgba(255,255,255,0.15); }
   
   .faq-card .label {
-    flex: 0 0 140px; display: flex; align-items: center; justify-content: center;
-    text-align: center; padding: 12px;
-    font-family: var(--sans); font-weight: 700; font-size: 12px;
-    letter-spacing: 0.02em; color: #fff; line-height: 1.3;
+    flex: 0 0 160px; display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 14px;
+    font-family: var(--sans); font-weight: 700; font-size: 16px;
+    color: #fff; line-height: 1.3;
     word-break: break-word;
   }
   .faq-card .content {
-    flex: 1; padding: 12px 20px; display: flex; flex-direction: column;
+    flex: 1; padding: 14px 20px; display: flex; flex-direction: column;
     justify-content: center; gap: 6px; min-width: 0;
   }
   
@@ -251,43 +248,40 @@
   .faq-card.today-row .label { background: linear-gradient(135deg, rgba(20, 184, 166, 0.3), rgba(13, 148, 136, 0.2)); }
 
   .content-row { display: flex; gap: 24px; flex-wrap: wrap; }
-  .content-row .col { flex: 1 1 220px; min-width: 200px; color: var(--amber); font-family: var(--mono); font-size: 12.5px; line-height: 1.4; }
-  .faq-card.question .content-row .col { font-weight: 500; color: #f3f4f6; }
+  .content-row .col { flex: 1 1 220px; min-width: 200px; color: var(--text); font-family: var(--mono); font-size: 16.5px; line-height: 1.5; }
+  .faq-card.question .content-row .col { font-weight: 500; color: #ffffff; }
 
-  /* Blok Baris Polos */
   .plain-block { 
     background: rgba(15, 22, 36, 0.6); border: 1px solid var(--border); 
-    border-radius: var(--radius-sm); padding: 10px 0; margin-bottom: 6px; 
+    border-radius: var(--radius-sm); padding: 12px 0; margin-bottom: 6px; 
   }
   .plain-block:has(.plain-row.today-row) { background: rgba(20, 184, 166, 0.05); border-color: rgba(20, 184, 166, 0.3); }
   .plain-row {
     display: flex; align-items: center; flex-wrap: wrap; gap: 24px;
-    padding: 6px 20px;
+    padding: 8px 20px;
   }
-  .plain-row .col { flex: 1 1 220px; min-width: 200px; color: var(--amber); font-family: var(--mono); font-size: 12.5px; }
+  .plain-row .col { flex: 1 1 220px; min-width: 200px; color: var(--text); font-family: var(--mono); font-size: 16.5px; line-height: 1.5; }
 
   .faq-spacer, .content-spacer { height: 6px; }
 
-  .faq-note { color: var(--text-muted); font-size: 12px; padding: 6px 16px; line-height: 1.5; font-family: var(--mono); }
-  .inline-link { color: #818cf8; text-decoration: none; word-break: break-all; }
-  .inline-link:hover { color: #a5b4fc; text-decoration: underline; }
+  .faq-note { color: var(--text); font-size: 16px; padding: 6px 16px; line-height: 1.6; font-family: var(--mono); }
+  .inline-link { color: #a5b4fc; text-decoration: none; word-break: break-all; }
+  .inline-link:hover { color: #c7d2fe; text-decoration: underline; }
 
-  /* Badge Modern */
   .badge {
-    display: inline-block; padding: 3px 10px; border-radius: 20px;
-    font-size: 11px; font-weight: 700; font-family: var(--sans);
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    font-size: 15px; font-weight: 700; font-family: var(--sans);
     letter-spacing: 0.03em; text-transform: uppercase;
   }
   .badge.win { background: rgba(20, 184, 166, 0.15); color: var(--teal); border: 1px solid rgba(20, 184, 166, 0.3); }
   .badge.lose { background: rgba(244, 63, 94, 0.15); color: var(--red); border: 1px solid rgba(244, 63, 94, 0.3); }
-  .badge.neutral { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+  .badge.neutral { background: rgba(255,255,255,0.06); color: var(--text); }
 
-  /* State Loading & Error */
   .state {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 14px; padding: 80px 20px; color: var(--text-dim); font-size: 13px;
+    gap: 14px; padding: 80px 20px; color: var(--text); font-size: 17px;
   }
-  .state svg { width: 32px; height: 32px; opacity: 0.4; }
+  .state svg { width: 32px; height: 32px; opacity: 0.6; }
   .state.error { color: var(--red); }
   .spinner {
     width: 28px; height: 28px; border-radius: 50%;
