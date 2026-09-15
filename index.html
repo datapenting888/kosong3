@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Keep Clone</title>
+    <title>Google Keep Clone - Enhanced</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <style>
         :root {
             --bg-color: #202124;
@@ -12,15 +14,35 @@
             --text-color: #e8eaed;
             --text-secondary: #9aa0a6;
             --accent-color: #fbbc04;
-            --hover-bg: rgba(255, 255, 255, 0.039);
+            --hover-bg: rgba(255, 255, 255, 0.078);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             font-family: 'Roboto', Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            margin: 0;
             padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-bottom: 1px solid #3c4043;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-left: 12px;
         }
 
         .container {
@@ -28,17 +50,16 @@
             margin: 0 auto;
         }
 
-        /* Form Input Catatan Baru */
+        /* Input Catatan Utama ala Google Keep */
         .note-input-container {
             background-color: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 8px;
             padding: 12px 16px;
-            margin-bottom: 30px;
-            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.6), 0 2px 6px 2px rgba(0,0,0,0.3);
+            margin: 0 auto 35px auto;
             max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.6), 0 2px 6px 2px rgba(0,0,0,0.3);
+            transition: box-shadow 0.2s ease;
         }
 
         .note-input-container input,
@@ -51,40 +72,93 @@
             outline: none;
             resize: none;
             font-family: inherit;
-            margin-bottom: 8px;
         }
 
         .note-input-container input {
-            font-weight: bold;
-            font-size: 1.1rem;
+            font-weight: 500;
+            font-size: 1.05rem;
+            margin-bottom: 10px;
+        }
+
+        .note-input-container textarea {
+            min-height: 40px;
+            margin-bottom: 8px;
         }
 
         .input-footer {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
-            margin-top: 8px;
+            margin-top: 4px;
+            border-top: 1px solid transparent;
         }
 
-        button {
+        .input-tools {
+            display: flex;
+            gap: 4px;
+        }
+
+        .tool-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .tool-btn:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-color);
+        }
+
+        button.btn-close {
             background: transparent;
             border: none;
             color: var(--text-color);
-            padding: 8px 16px;
+            padding: 8px 24px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: 500;
         }
 
-        button:hover {
+        button.btn-close:hover {
             background-color: var(--hover-bg);
         }
 
-        .btn-close {
-            color: var(--text-color);
+        /* Pratinjau Gambar di Form Input */
+        .preview-container {
+            position: relative;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .preview-container img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+        .remove-img-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Grid Catatan */
+        /* Grid Kartu Catatan */
         .notes-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -102,11 +176,12 @@
             justify-content: space-between;
             position: relative;
             box-shadow: 0 1px 2px 0 rgba(0,0,0,0.3);
-            transition: box-shadow 0.2s ease;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
         }
 
         .note-card:hover {
             box-shadow: 0 1px 3px 1px rgba(0,0,0,0.5);
+            border-color: #8ab4f8;
         }
 
         .note-card input.edit-title,
@@ -121,24 +196,23 @@
         }
 
         .note-card input.edit-title {
-            font-weight: bold;
+            font-weight: 500;
             font-size: 1.05rem;
             margin-bottom: 8px;
         }
 
         .note-card textarea.edit-body {
             font-size: 0.95rem;
-            min-height: 80px;
-            color: var(--text-secondary);
+            min-height: 90px;
+            color: var(--text-color);
+            line-height: 1.4;
         }
 
-        /* Bagian Gambar didalam Kartu (seperti contoh) */
-        .note-image {
+        .card-image {
             width: 100%;
-            max-height: 250px;
-            object-fit: contain;
-            background: #000;
-            border-radius: 4px;
+            max-height: 220px;
+            object-fit: cover;
+            border-radius: 6px;
             margin-bottom: 10px;
         }
 
@@ -157,8 +231,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 10px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.08);
             padding-top: 8px;
         }
 
@@ -168,18 +242,28 @@
         }
 
         .btn-delete {
-            font-size: 0.8rem;
-            color: #f28b82;
-        }
-        .btn-delete:hover {
-            background-color: rgba(242, 139, 130, 0.1);
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Notifikasi Toast untuk Copy Link */
+        .btn-delete:hover {
+            background-color: var(--hover-bg);
+            color: #f28b82;
+        }
+
+        /* Toast Notifikasi */
         #toast {
             visibility: hidden;
             min-width: 250px;
-            background-color: #333;
+            background-color: #323232;
             color: #fff;
             text-align: center;
             border-radius: 4px;
@@ -189,65 +273,82 @@
             left: 50%;
             bottom: 30px;
             transform: translateX(-50%);
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.4);
+            font-size: 0.9rem;
         }
         #toast.show {
             visibility: visible;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.3s, fadeout 0.3s 2.5s;
         }
-        @keyframes fadein {
-            from {bottom: 0; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
-        }
-        @keyframes fadeout {
-            from {bottom: 30px; opacity: 1;}
-            to {bottom: 0; opacity: 0;}
-        }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
 <body>
 
+<div class="header">
+    <span class="material-icons-outlined" style="font-size: 28px; color: #fbbc04;">lightbulb</span>
+    <h1>Google Keep</h1>
+</div>
+
 <div class="container">
-    <!-- Kotak Input Buat Catatan Baru -->
-    <div class="note-input-container">
+    <!-- Kotak Input Pembuatan Catatan Baru -->
+    <div class="note-input-container" id="inputContainer">
         <input type="text" id="inputTitle" placeholder="Judul">
-        <textarea id="inputBody" placeholder="Buat catatan..." rows="2"></textarea>
-        <input type="text" id="inputImage" placeholder="URL Gambar (Opsional, misal: https://...)" style="font-size: 0.85rem; color: var(--text-secondary);">
+        <textarea id="inputBody" placeholder="Buat catatan..."></textarea>
+        
+        <!-- Pratinjau Gambar yang Dipilih -->
+        <div class="preview-container" id="previewContainer">
+            <img id="imagePreview" src="" alt="Preview">
+            <button class="remove-img-btn" id="removeImgBtn" title="Hapus Gambar">&times;</button>
+        </div>
+
         <div class="input-footer">
+            <div class="input-tools">
+                <!-- Tombol Upload File Gambar -->
+                <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                <button class="tool-btn" onclick="document.getElementById('imageInput').click()" title="Tambah Gambar">
+                    <span class="material-icons-outlined">image</span>
+                </button>
+            </div>
             <button id="btnAddNote" class="btn-close">Selesai</button>
         </div>
     </div>
 
-    <!-- Tempat Daftar Catatan Muncul -->
+    <!-- Grid Tempat Catatan Ditampilkan -->
     <div class="notes-grid" id="notesGrid"></div>
 </div>
 
-<!-- Elemen Notifikasi Toast -->
-<div id="toast">Link berhasil dicopy ke Clipboard!</div>
+<div id="toast">Link berhasil disalin ke Clipboard!</div>
 
 <script>
-    // Inisialisasi data dari LocalStorage atau data default sesuai contoh gambar Anda
-    let notes = JSON.parse(localStorage.getItem('keep_notes')) || [
+    let currentImageBase64 = "";
+
+    // Data Awal (Default)
+    let notes = JSON.parse(localStorage.getItem('keep_notes_v2')) || [
         {
             id: 1,
             title: "PROFIL DANA",
             body: "https://ibb.co/HDpS2ZMg",
             image: "",
-            updatedAt: "Baru saja"
+            updatedAt: "Tersimpan"
         },
         {
             id: 2,
             title: "RRN DANA",
             body: "https://ibb.co/QWJpCzB",
             image: "",
-            updatedAt: "Baru saja"
+            updatedAt: "Tersimpan"
         }
     ];
 
     const notesGrid = document.getElementById('notesGrid');
     const inputTitle = document.getElementById('inputTitle');
     const inputBody = document.getElementById('inputBody');
-    const inputImage = document.getElementById('inputImage');
+    const imageInput = document.getElementById('imageInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const removeImgBtn = document.getElementById('removeImgBtn');
     const btnAddNote = document.getElementById('btnAddNote');
     const toast = document.getElementById('toast');
 
@@ -257,7 +358,27 @@
         setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
     }
 
-    // Fungsi mengubah teks link mentah menjadi tag <a> yang bisa diklik + otomatis copy
+    // Handle Upload Gambar dari Perangkat
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                currentImageBase64 = event.target.result;
+                imagePreview.src = currentImageBase64;
+                previewContainer.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    removeImgBtn.addEventListener('click', () => {
+        currentImageBase64 = "";
+        imageInput.value = "";
+        previewContainer.style.display = 'none';
+    });
+
+    // Format Link Otomatis & Bisa Diklik
     function formatLinks(text) {
         const urlRegex = /(https?:\/\/[^\s]+)/g;
         return text.replace(urlRegex, function(url) {
@@ -265,59 +386,54 @@
         });
     }
 
-    // Aksi saat link diklik: otomatis menyalin ke clipboard & membuka link
     window.handleLinkClick = function(event, url) {
-        event.preventDefault(); // Mencegah langsung buka tab baru sebelum tercopy (opsional, atau biarkan terbuka)
+        event.preventDefault();
         navigator.clipboard.writeText(url).then(() => {
             showToast(`Link disalin: ${url}`);
-            // Buka link di tab baru setelah 0.5 detik agar user sempat melihat notifikasi copy
             setTimeout(() => {
                 window.open(url, '_blank');
             }, 400);
-        }).catch(err => {
+        }).catch(() => {
             window.open(url, '_blank');
         });
     }
 
-    // Render Catatan ke Layar
+    // Render Semua Catatan
     function renderNotes() {
         notesGrid.innerHTML = '';
         notes.forEach((note, index) => {
             const card = document.createElement('div');
             card.className = 'note-card';
 
-            // Render gambar jika ada
-            let imageHtml = note.image ? `<img src="${note.image}" class="note-image" alt="Catatan Gambar">` : '';
+            let imageHtml = note.image ? `<img src="${note.image}" class="card-image" alt="Gambar Catatan">` : '';
 
             card.innerHTML = `
                 <div>
                     ${imageHtml}
-                    <input type="text" class="edit-title" value="${note.title}" data-index="${index}" placeholder="Judul">
-                    <textarea class="edit-body" data-index="${index}" placeholder="Isi catatan...">${note.body}</textarea>
+                    <input type="text" class="edit-title" value="${escapeHtml(note.title)}" data-index="${index}" placeholder="Judul">
+                    <textarea class="edit-body" data-index="${index}" placeholder="Isi catatan...">${escapeHtml(note.body)}</textarea>
                 </div>
                 <div class="card-footer">
                     <span class="save-status" id="status-${index}">${note.updatedAt || 'Tersimpan'}</span>
-                    <button class="btn-delete" onclick="deleteNote(${index})">Hapus</button>
+                    <button class="btn-delete" onclick="deleteNote(${index})" title="Hapus Catatan">
+                        <span class="material-icons-outlined" style="font-size: 18px;">delete_outline</span>
+                    </button>
                 </div>
             `;
             notesGrid.appendChild(card);
         });
 
-        // Tambahkan event listener untuk fitur "Auto-Save" (Simpan setiap ada perubahan)
+        // Event listener untuk Auto-Save saat teks diubah
         document.querySelectorAll('.edit-title, .edit-body').forEach(element => {
             element.addEventListener('input', (e) => {
                 const index = e.target.getAttribute('data-index');
                 const field = e.target.classList.contains('edit-title') ? 'title' : 'body';
                 
-                // Update data di array lokal
                 notes[index][field] = e.target.value;
-                notes[index][updatedAtText()] = "Menyimpan...";
                 
-                // Ubah status teks menjadi 'Menyimpan...'
                 const statusEl = document.getElementById(`status-${index}`);
                 if(statusEl) statusEl.textContent = "Menyimpan...";
 
-                // Simpan otomatis ke LocalStorage dengan jeda (debounce)
                 clearTimeout(window.saveTimeout);
                 window.saveTimeout = setTimeout(() => {
                     saveToLocalStorage();
@@ -327,34 +443,36 @@
         });
     }
 
-    function updatedAtText() {
-        const now = new Date();
-        return 'updatedAt';
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     function saveToLocalStorage() {
-        localStorage.setItem('keep_notes', JSON.stringify(notes));
+        localStorage.setItem('keep_notes_v2', JSON.stringify(notes));
     }
 
-    // Tambah Catatan Baru dari Form Atas
+    // Tambah Catatan Baru
     btnAddNote.addEventListener('click', () => {
-        if (!inputTitle.value && !inputBody.value && !inputImage.value) return;
+        if (!inputTitle.value && !inputBody.value && !currentImageBase64) return;
 
         notes.unshift({
             id: Date.now(),
             title: inputTitle.value,
             body: inputBody.value,
-            image: inputImage.value,
+            image: currentImageBase64,
             updatedAt: "Tersimpan"
         });
 
         saveToLocalStorage();
         renderNotes();
 
-        // Reset input
+        // Reset form input
         inputTitle.value = '';
         inputBody.value = '';
-        inputImage.value = '';
+        currentImageBase64 = '';
+        imageInput.value = '';
+        previewContainer.style.display = 'none';
     });
 
     // Hapus Catatan
@@ -364,7 +482,7 @@
         renderNotes();
     }
 
-    // Render pertama kali saat halaman dimuat
+    // Jalankan render pertama kali
     renderNotes();
 </script>
 
